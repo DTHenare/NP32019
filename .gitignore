@@ -1,2 +1,6 @@
 EEG/
 Behaviour/
+*.pdf
+*.tex
+NP3_Paper_files/
+.RProj.user/
