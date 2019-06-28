@@ -1,0 +1,256 @@
+---
+header-includes: 
+  - \thispagestyle{empty}
+  - \usepackage{setspace}
+  - \setstretch{2}
+  - \AtBeginEnvironment{tabular}{\doublespacing}
+  - \AtBeginEnvironment{lltable}{\doublespacing}
+  - \AtBeginEnvironment{tablenotes}{\doublespacing}
+  - \captionsetup[table]{font={stretch=1.5}}
+  - \captionsetup[figure]{font={stretch=1.5}}
+  - \usepackage{booktabs}
+
+title             : "NP3"
+shorttitle        : "NP3"
+
+author: 
+  - name          : "Dion T. Henare"
+    affiliation   : "1"
+    corresponding : yes
+    address       : "Gutenbergstraße 18, 35032 Marburg"
+    email         : "dion.henare@uni-marburg.de"
+  - name          : "Jan Tunnermann"
+    affiliation   : "1"
+  - name          : "Anna Schuboe"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "Philipps-University of Marburg, Germany"
+
+author_note: |
+  Funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) – project number 222641018 – SFB/TRR 135 TP B3
+
+abstract: |
+  Abstract goes here
+
+bibliography      : ["NP32019_references.bib"]
+
+figsintext        : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+lineno            : no
+mask              : no
+
+numbersection     : no
+class             : "man"
+output            : papaja::apa6_pdf
+
+---
+
+\raggedbottom
+
+```{r setup, include = FALSE}
+set.seed(4609948)
+library(knitr)
+opts_chunk$set(echo = FALSE)
+library("papaja")
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(afex)
+```
+
+```{r analysis-preferences}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+```
+
+
+```{r organiseData}
+dPath = 'EEG/Visuals/'
+fPrefix = 'N2pc'
+
+#####
+#Creates aggregate of all participant data (needs dPath and fPrefix)
+eFilePattern = paste(fPrefix,"*_epochs.csv", sep="")
+lFilePattern = paste(fPrefix,"*_LH.csv", sep="")
+rFilePattern = paste(fPrefix,"*_RH.csv", sep="")
+eFileList = list.files(dPath, pattern=glob2rx(eFilePattern))
+lFileList = list.files(dPath, pattern=glob2rx(lFilePattern))
+rFileList = list.files(dPath, pattern=glob2rx(rFilePattern))
+
+#create variables using first dataset
+epochInfo = read.csv(file = paste(dPath,eFileList[1], sep=""))
+epochInfo$Subject = 1
+lHemData = read.csv(file = paste(dPath,lFileList[1], sep=""), header = FALSE)
+rHemData = read.csv(file = paste(dPath,rFileList[1], sep=""), header = FALSE)
+#append the other datasets to the above variables
+for (subj in 2:length(eFileList)) {
+  curEpochInfo = read.csv(file = paste(dPath,eFileList[subj], sep=""))
+  curEpochInfo$Subject = subj
+  curLHemData = read.csv(file = paste(dPath,lFileList[subj], sep=""), header = FALSE)
+  curRHemData = read.csv(file = paste(dPath,rFileList[subj], sep=""), header = FALSE)
+  
+  epochInfo = rbind(epochInfo, curEpochInfo)
+  lHemData = rbind(lHemData, curLHemData)
+  rHemData = rbind(rHemData, curRHemData)
+}
+
+#clear stuff that I don't need
+rm(curEpochInfo,curLHemData,curRHemData, fPrefix, eFileList, eFilePattern, lFileList, lFilePattern, rFileList, rFilePattern, subj)
+#####
+#Permutation can be done at this stage using epochInfo$Hemifield = sample(epochInfo$Hemifield, replace=FALSE)
+#combine all the data together into one long table
+gathercols = colnames(lHemData)
+lHemData$Hem = "Left"
+rHemData$Hem = "Right"
+scalpData = rbind(lHemData,rHemData)
+origEpochInfo = rbind(epochInfo,epochInfo)
+
+allData <- cbind(origEpochInfo, scalpData)
+allData <- gather(allData, "sample", "voltage", gathercols, factor_key = TRUE)
+
+#Tidy variable names etc. and create any necessary variables - could use unite
+allData$sample <- as.integer(substring(allData$sample,2))
+allData <- allData %>% mutate(Contra = ifelse(EasyField==Hem, "Ipsilateral", "Contralateral"))
+allData$SimpSet <- allData$EasySet
+allData$SimpSet <- recode(allData$SimpSet, "1" = "Small", "2" = "Small", "3" ="Medium", "4"="Medium", "5"="Medium", "6"="Large", "7"="Large")
+
+#clear stuff that I don't need
+rm(origEpochInfo,scalpData)
+```
+
+```{r setParams}
+baseline = 200
+plotWidth = 24
+plotHeight = 9
+
+N2pcStart = 200
+N2pcEnd = 300
+SPCNStart = 300
+SPCNEnd = 498
+```
+
+```{r countTrials, results='asis'}
+xtable::xtable(allData %>%
+  filter(Event == "Search",sample == 1, Contra == 'Contralateral') %>%
+  group_by(Subject,SimpSet) %>%
+  summarise(trialCount = sum(sample))
+)
+```
+
+```{r ERPStats, warning=FALSE}
+N2pc.data <- allData %>%
+  mutate(sample = sample*2-baseline) %>%
+  filter(Event == "Search" & sample>N2pcStart & sample < N2pcEnd) %>%
+  group_by(SimpSet,Contra,Subject) %>%
+  summarise(mV = mean(voltage))
+N2pc.aov <- aov_ez(
+  data = N2pc.data,
+  dv = "mV",
+  id = "Subject", 
+  within = c("Contra","SimpSet")
+)
+N2pc.results <- apa_print(N2pc.aov)
+
+SPCN.data <- allData %>%
+  mutate(sample = sample*2-baseline) %>%
+  filter(Event == "Search" & sample>SPCNStart & sample < SPCNEnd) %>%
+  group_by(SimpSet,Contra,Subject) %>%
+  summarise(mV = mean(voltage))
+SPCN.aov <- aov_ez(
+  data = SPCN.data,
+  dv = "mV",
+  id = "Subject", 
+  within = c("Contra","SimpSet")
+)
+SPCN.results <- apa_print(SPCN.aov)
+
+#Extract for SPSS
+ExportN2pc <- N2pc.data %>% unite(Condition,c("SimpSet","Contra")) %>% spread(Condition,mV)
+write.csv(ExportN2pc,"C:\\Users\\dionh\\Documents\\NP32019\\EEG\\N2pcStats.csv", row.names = FALSE)
+```
+
+The results of the interaction in the 2x3 (electrode by simplified set size) ANOVA for N2pc amplitude (`r N2pc.results$full_result$Contra_SimpSet`).
+
+```{r N2pcStatsTable, results='asis'}
+apa_table(
+  N2pc.results$table
+  , caption = "Results of the 2x3 repeated measures ANOVA (Electrode by simplified set size) for the N2pc component."
+  , note = "Note goes here."
+)
+```
+
+The results of the interaction in the 2x3 (electrode by simplified set size) ANOVA for SPCN amplitude (`r SPCN.results$full_result$Contra_SimpSet`).
+
+```{r SPCNStatsTable, results='asis'}
+apa_table(
+  SPCN.results$table
+  , caption = "Results of the 2x3 repeated measures ANOVA (Electrode by simplified set size) for the SPCN component."
+  , note = "Note goes here."
+)
+```
+
+(ref:fullSetERPCap) Subtractracted ERPs showing the lateralized response contralateral to the side of the easy target as a function of easy set size.
+
+```{r fullSetPlot, fig.cap="(ref:fullSetERPCap)"}
+#Subtracted ERPs split by all set sizes
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(EasySet,sample,Contra) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Contra, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_line(aes(colour = EasySet),size=1) +
+    scale_colour_brewer(palette = "Blues") +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    theme_minimal() +
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
+```
+
+(ref:simpSetERPCap) Subtractracted ERPs showing the lateralized response contralateral to the side of the easy target as a function of easy set size (small=1/2, medium=3/4/5, large = 6/7).
+
+```{r simpSetPlot, fig.cap="(ref:simpSetERPCap)"}
+#Uses implified set sizes (1/2 vs 3/4/5 vs 6/7)
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(SimpSet,sample,Contra) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Contra, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_line(aes(colour = SimpSet),size=1) +
+    scale_colour_brewer(palette = "Blues") +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    theme_minimal() +
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
+```
+
+
+
+
+\newpage
+
+
+```{r create_r-references}
+r_refs(file = "NP32019_references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id = "refs"></div>
+\endgroup
