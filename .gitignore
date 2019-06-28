@@ -4,3 +4,4 @@ Behaviour/
 *.tex
 NP3_Paper_files/
 .RProj.user/
+.Rproj.user
