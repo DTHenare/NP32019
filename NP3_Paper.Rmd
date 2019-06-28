@@ -203,7 +203,7 @@ SPCN.results <- apa_print(SPCN.aov)
 
 #Extract for SPSS
 ExportN2pc <- N2pc.data %>% unite(Condition,c("SimpSet","Contra")) %>% spread(Condition,mV)
-write.csv(ExportN2pc,"C:\\Users\\dionh\\Documents\\NP32019\\EEG\\N2pcStats.csv", row.names = FALSE)
+write.csv(ExportN2pc,"EEG\\N2pcStats.csv", row.names = FALSE)
 ```
 
 The results of the interaction in the 2x3 (electrode by simplified set size) ANOVA for N2pc amplitude (`r N2pc.results$full_result$Contra_SimpSet`).
