@@ -53,6 +53,7 @@ output            : papaja::apa6_pdf
 
 ```{r setup, include = FALSE}
 set.seed(4609948)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 library(knitr)
 opts_chunk$set(echo = FALSE)
 library("papaja")
@@ -62,10 +63,35 @@ library(ggplot2)
 library(afex)
 ```
 
-```{r analysis-preferences}
-# Seed for random number generation
-set.seed(42)
-knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+```{r organiseBehavData}
+behavData <- read.table("F:/NP32019/Behaviour/BehavData.csv",header = TRUE, sep=",")
+
+#Remove lots of the default EPrime columns
+behavData <- select(behavData,-c(ExperimentName	,Session	,Clock.Information	,DataFile.Basename	,Display.RefreshRate	,ExperimentVersion	,PracAcc	,PracRT	,RandomSeed	,RuntimeCapabilities	,RuntimeVersion	,RuntimeVersionExpected	,SessionDate	,SessionStartDateTimeUtc	,SessionTime	,StudioVersion	,totalEuro	,totalPoints	,FiveDiffLeftFar	,FiveDiffLeftNear	,FiveDiffRightFar	,FiveDiffRightNear	,FiveEasyLeftFar	,FiveEasyLeftNear	,FiveEasyRightFar	,FiveEasyRightNear	,FourDiffLeftFar	,FourDiffLeftNear	,FourDiffRightFar	,FourDiffRightNear	,FourEasyLeftFar	,FourEasyLeftNear	,FourEasyRightFar	,FourEasyRightNear	,image1x	,image1y	,image2x	,image2y	,image3x	,image3y	,image4x	,image4y	,image5x	,image5y	,image6x	,image6y	,image7x	,image7y	,image8x	,image8y	,leftImage1	,leftImage2	,leftImage3	,leftImage4	,leftImage5	,leftImage6	,leftImage7	,leftImage8	,OneDiffLeftFar	,OneDiffLeftNear	,OneDiffRightFar	,OneDiffRightNear	,OneEasyLeftFar	,OneEasyLeftNear	,OneEasyRightFar	,OneEasyRightNear	,Response.ACC	,Response.CRESP	,Response.DurationError	,Response.OnsetDelay	,Response.OnsetTime	,Response.OnsetToOnsetTime	,Response.RESP	,Response.RT	,Response.RTTime	,Response1.ACC	,Response1.CRESP	,Response1.DurationError	,Response1.OnsetDelay	,Response1.OnsetTime	,Response1.OnsetToOnsetTime	,Response1.RESP	,Response1.RT	,Response1.RTTime	,rightImage1	,rightImage2	,rightImage3	,rightImage4	,rightImage5	,rightImage6	,rightImage7	,rightImage8	,Search.DurationError	,Search.OffsetTime	,Search.OnsetDelay	,Search.OnsetTime	,SevenDiffLeftFar	,SevenDiffLeftNear	,SevenDiffRightFar	,SevenDiffRightNear	,SevenEasyLeftFar	,SevenEasyLeftNear	,SevenEasyRightFar	,SevenEasyRightNear	,SixDiffLeftFar	,SixDiffLeftNear	,SixDiffRightFar	,SixDiffRightNear	,SixEasyLeftFar	,SixEasyLeftNear	,SixEasyRightFar	,SixEasyRightNear	,ThreeDiffLeftFar	,ThreeDiffLeftNear	,ThreeDiffRightFar	,ThreeDiffRightNear	,ThreeEasyLeftFar	,ThreeEasyLeftNear	,ThreeEasyRightFar	,ThreeEasyRightNear	,TwoDiffLeftFar	,TwoDiffLeftNear	,TwoDiffRightFar	,TwoDiffRightNear	,TwoEasyLeftFar	,TwoEasyLeftNear	,TwoEasyRightFar	,TwoEasyRightNear	)
+       )
+#Remove practice trials
+behavData <- filter(behavData, Running.Block. != "Practice")
+
+#Make subejct a factor
+behavData$Subject <- as.factor(behavData$Subject)
+
+#Reorder the relevant variable factors and make table
+behavData$collapseNFLR <- factor(behavData$collapseNFLR, levels = c("One", "Two", "Three", "Four", "Five", "Six", "Seven"))
+behavData %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials)
+
+#Plot participant choices
+behavData %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials) %>%
+  ggplot(., aes(collapseNFLR,propEasy, colour = Subject, group = Subject)) +
+  geom_point() + geom_line()
+  
 ```
 
 
