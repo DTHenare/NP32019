@@ -82,7 +82,12 @@ behavData %>%
   summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
   mutate(totalTrials = numEasy+numDiff) %>%
   mutate(propEasy = numEasy/totalTrials)
+  
+```
 
+(ref:indvSubjChoice) Subtractracted ERPs showing the lateralized response contralateral to the side of the easy target as a function of easy set size.
+
+```{r plotIndvSubjChoice, fig.cap="(ref:indvSubjChoice)"}
 #Plot participant choices
 behavData %>%
   group_by(collapseNFLR,Subject) %>%
@@ -90,10 +95,11 @@ behavData %>%
   mutate(totalTrials = numEasy+numDiff) %>%
   mutate(propEasy = numEasy/totalTrials) %>%
   ggplot(., aes(collapseNFLR,propEasy, colour = Subject, group = Subject)) +
-  geom_point() + geom_line()
-  
+  geom_point() + 
+  geom_line() +
+  facet_grid(Subject ~.) +
+  theme_apa()
 ```
-
 
 ```{r organiseData}
 dPath = 'EEG/Visuals/'
