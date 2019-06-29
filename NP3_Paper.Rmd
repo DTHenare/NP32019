@@ -61,6 +61,7 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(afex)
+library(xtable)
 ```
 
 ```{r organiseBehavData}
@@ -147,7 +148,7 @@ allData <- gather(allData, "sample", "voltage", gathercols, factor_key = TRUE)
 
 #Tidy variable names etc. and create any necessary variables - could use unite
 allData$sample <- as.integer(substring(allData$sample,2))
-allData <- allData %>% mutate(Contra = ifelse(EasyField==Hem, "Ipsilateral", "Contralateral"))
+allData <- allData %>% mutate(Electrode = ifelse(EasyField==Hem, "Ipsilateral", "Contralateral"))
 allData$SimpSet <- allData$EasySet
 allData$SimpSet <- recode(allData$SimpSet, "1" = "Small", "2" = "Small", "3" ="Medium", "4"="Medium", "5"="Medium", "6"="Large", "7"="Large")
 
@@ -167,46 +168,49 @@ SPCNEnd = 498
 ```
 
 ```{r countTrials, results='asis'}
-xtable::xtable(allData %>%
-  filter(Event == "Search",sample == 1, Contra == 'Contralateral') %>%
-  group_by(Subject,SimpSet) %>%
-  summarise(trialCount = sum(sample))
-)
+print(
+  xtable(allData %>%
+    filter(Event == "Search",sample == 1, Electrode == 'Contralateral') %>%
+    group_by(Subject,SimpSet) %>%
+    summarise(trialCount = sum(sample)) %>%
+      spread(SimpSet,trialCount)
+  ,digits = 0)
+,include.rownames = FALSE, comment = FALSE)
 ```
 
 ```{r ERPStats, warning=FALSE}
 N2pc.data <- allData %>%
   mutate(sample = sample*2-baseline) %>%
   filter(Event == "Search" & sample>N2pcStart & sample < N2pcEnd) %>%
-  group_by(SimpSet,Contra,Subject) %>%
+  group_by(SimpSet,Electrode,Subject) %>%
   summarise(mV = mean(voltage))
 N2pc.aov <- aov_ez(
   data = N2pc.data,
   dv = "mV",
   id = "Subject", 
-  within = c("Contra","SimpSet")
+  within = c("Electrode","SimpSet")
 )
 N2pc.results <- apa_print(N2pc.aov)
 
 SPCN.data <- allData %>%
   mutate(sample = sample*2-baseline) %>%
   filter(Event == "Search" & sample>SPCNStart & sample < SPCNEnd) %>%
-  group_by(SimpSet,Contra,Subject) %>%
+  group_by(SimpSet,Electrode,Subject) %>%
   summarise(mV = mean(voltage))
 SPCN.aov <- aov_ez(
   data = SPCN.data,
   dv = "mV",
   id = "Subject", 
-  within = c("Contra","SimpSet")
+  within = c("Electrode","SimpSet")
 )
 SPCN.results <- apa_print(SPCN.aov)
 
 #Extract for SPSS
-ExportN2pc <- N2pc.data %>% unite(Condition,c("SimpSet","Contra")) %>% spread(Condition,mV)
+ExportN2pc <- N2pc.data %>% unite(Condition,c("SimpSet","Electrode")) %>% spread(Condition,mV)
 write.csv(ExportN2pc,"EEG\\N2pcStats.csv", row.names = FALSE)
 ```
 
-The results of the interaction in the 2x3 (electrode by simplified set size) ANOVA for N2pc amplitude (`r N2pc.results$full_result$Contra_SimpSet`).
+The results of the interaction in the 2x3 (electrode by simplified set size) ANOVA for N2pc amplitude (`r N2pc.results$full_result$Electrode_SimpSet`).
 
 ```{r N2pcStatsTable, results='asis'}
 apa_table(
@@ -216,7 +220,7 @@ apa_table(
 )
 ```
 
-The results of the interaction in the 2x3 (electrode by simplified set size) ANOVA for SPCN amplitude (`r SPCN.results$full_result$Contra_SimpSet`).
+The results of the interaction in the 2x3 (electrode by simplified set size) ANOVA for SPCN amplitude (`r SPCN.results$full_result$Electrode_SimpSet`).
 
 ```{r SPCNStatsTable, results='asis'}
 apa_table(
@@ -233,9 +237,9 @@ apa_table(
 allData %>%
   filter(Event == "Search") %>%
   mutate(sample = sample*2-baseline) %>%
-  group_by(EasySet,sample,Contra) %>%
+  group_by(EasySet,sample,Electrode) %>%
   summarise(mean = mean(voltage)) %>%
-  spread(Contra, mean) %>% 
+  spread(Electrode, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>%
   ggplot(., aes(sample,diff)) +
     geom_line(aes(colour = EasySet),size=1) +
@@ -255,9 +259,9 @@ allData %>%
 allData %>%
   filter(Event == "Search") %>%
   mutate(sample = sample*2-baseline) %>%
-  group_by(SimpSet,sample,Contra) %>%
+  group_by(SimpSet,sample,Electrode) %>%
   summarise(mean = mean(voltage)) %>%
-  spread(Contra, mean) %>% 
+  spread(Electrode, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>%
   ggplot(., aes(sample,diff)) +
     geom_line(aes(colour = SimpSet),size=1) +
