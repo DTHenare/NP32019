@@ -65,7 +65,7 @@ library(xtable)
 ```
 
 ```{r organiseBehavData}
-behavData <- read.table("F:/NP32019/Behaviour/BehavData.csv",header = TRUE, sep=",")
+behavData <- read.table("Behaviour/BehavData.csv",header = TRUE, sep=",")
 
 #Remove lots of the default EPrime columns
 behavData <- select(behavData,-c(ExperimentName	,Session	,Clock.Information	,DataFile.Basename	,Display.RefreshRate	,ExperimentVersion	,PracAcc	,PracRT	,RandomSeed	,RuntimeCapabilities	,RuntimeVersion	,RuntimeVersionExpected	,SessionDate	,SessionStartDateTimeUtc	,SessionTime	,StudioVersion	,totalEuro	,totalPoints	,FiveDiffLeftFar	,FiveDiffLeftNear	,FiveDiffRightFar	,FiveDiffRightNear	,FiveEasyLeftFar	,FiveEasyLeftNear	,FiveEasyRightFar	,FiveEasyRightNear	,FourDiffLeftFar	,FourDiffLeftNear	,FourDiffRightFar	,FourDiffRightNear	,FourEasyLeftFar	,FourEasyLeftNear	,FourEasyRightFar	,FourEasyRightNear	,image1x	,image1y	,image2x	,image2y	,image3x	,image3y	,image4x	,image4y	,image5x	,image5y	,image6x	,image6y	,image7x	,image7y	,image8x	,image8y	,leftImage1	,leftImage2	,leftImage3	,leftImage4	,leftImage5	,leftImage6	,leftImage7	,leftImage8	,OneDiffLeftFar	,OneDiffLeftNear	,OneDiffRightFar	,OneDiffRightNear	,OneEasyLeftFar	,OneEasyLeftNear	,OneEasyRightFar	,OneEasyRightNear	,Response.ACC	,Response.CRESP	,Response.DurationError	,Response.OnsetDelay	,Response.OnsetTime	,Response.OnsetToOnsetTime	,Response.RESP	,Response.RT	,Response.RTTime	,Response1.ACC	,Response1.CRESP	,Response1.DurationError	,Response1.OnsetDelay	,Response1.OnsetTime	,Response1.OnsetToOnsetTime	,Response1.RESP	,Response1.RT	,Response1.RTTime	,rightImage1	,rightImage2	,rightImage3	,rightImage4	,rightImage5	,rightImage6	,rightImage7	,rightImage8	,Search.DurationError	,Search.OffsetTime	,Search.OnsetDelay	,Search.OnsetTime	,SevenDiffLeftFar	,SevenDiffLeftNear	,SevenDiffRightFar	,SevenDiffRightNear	,SevenEasyLeftFar	,SevenEasyLeftNear	,SevenEasyRightFar	,SevenEasyRightNear	,SixDiffLeftFar	,SixDiffLeftNear	,SixDiffRightFar	,SixDiffRightNear	,SixEasyLeftFar	,SixEasyLeftNear	,SixEasyRightFar	,SixEasyRightNear	,ThreeDiffLeftFar	,ThreeDiffLeftNear	,ThreeDiffRightFar	,ThreeDiffRightNear	,ThreeEasyLeftFar	,ThreeEasyLeftNear	,ThreeEasyRightFar	,ThreeEasyRightNear	,TwoDiffLeftFar	,TwoDiffLeftNear	,TwoDiffRightFar	,TwoDiffRightNear	,TwoEasyLeftFar	,TwoEasyLeftNear	,TwoEasyRightFar	,TwoEasyRightNear	)
@@ -78,17 +78,18 @@ behavData$Subject <- as.factor(behavData$Subject)
 
 #Reorder the relevant variable factors and make table
 behavData$collapseNFLR <- factor(behavData$collapseNFLR, levels = c("One", "Two", "Three", "Four", "Five", "Six", "Seven"))
-behavData %>%
+```
+
+(ref:indvSubjChoice) The proportion of trials where participants chose to respond to the easy target as a function of set size for the easy target. Greater than 50% would indicate a preference for the easy target in that condition, whereas less than 50% would indicate a preference for the difficult target in that condition.
+
+```{r plotIndvSubjChoice, fig.cap="(ref:indvSubjChoice)"}
+#Make group RT
+groupChoice <- behavData %>%
+  mutate(Subject = "Average") %>%
   group_by(collapseNFLR,Subject) %>%
   summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
   mutate(totalTrials = numEasy+numDiff) %>%
   mutate(propEasy = numEasy/totalTrials)
-  
-```
-
-(ref:indvSubjChoice) Subtractracted ERPs showing the lateralized response contralateral to the side of the easy target as a function of easy set size.
-
-```{r plotIndvSubjChoice, fig.cap="(ref:indvSubjChoice)"}
 #Plot participant choices
 behavData %>%
   group_by(collapseNFLR,Subject) %>%
@@ -96,9 +97,53 @@ behavData %>%
   mutate(totalTrials = numEasy+numDiff) %>%
   mutate(propEasy = numEasy/totalTrials) %>%
   ggplot(., aes(collapseNFLR,propEasy, colour = Subject, group = Subject)) +
-  geom_point() + 
-  geom_line() +
-  facet_grid(Subject ~.) +
+  geom_line(alpha = 0.5) +
+  geom_point(data = groupChoice, size = 2.5, color = "black") + 
+  geom_line(data = groupChoice, size = 1.5, color = "black") +
+  geom_hline(yintercept = 0.5) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Proportion of easy target selections") +
+  theme_apa()
+```
+
+(ref:indvSubjAcc) Participant accuracy as a fucntion of set size for the easy target.
+
+```{r plotIndvSubjAccuracy, fig.cap="(ref:indvSubjAcc)"}
+#Make group acc
+groupAcc <- behavData %>%
+  mutate(Subject = "Average", Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC))
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  ggplot(., aes(collapseNFLR,Accuracy, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5) + 
+  geom_point(data = groupAcc, size = 2.5, color = "black") +
+  geom_line(data = groupAcc, size = 1.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)") +
+  theme_apa()
+```
+
+(ref:indvSubjRT) Participants response time as a function of set size for the easy target.
+
+```{r plotIndvSubjRT, fig.cap="(ref:indvSubjRT)"}
+#Make group RT
+groupRT <- behavData %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(RT = mean(Search.RT))
+behavData %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  ggplot(., aes(collapseNFLR,RT, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5) +
+  geom_point(data = groupRT, size = 2.5, color = "black") +
+  geom_line(data = groupRT, size = 1.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response time (ms)") +
   theme_apa()
 ```
 
