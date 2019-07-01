@@ -309,21 +309,40 @@ allData %>%
   spread(Electrode, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>%
   ggplot(., aes(sample,diff)) +
+    geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 0, ymax = -1), fill = "orange1") +
     geom_line(aes(colour = SimpSet),size=1) +
+    labs(colour = "Easy Set Size") +
+    scale_colour_brewer(palette = "Blues") +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name = expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    theme_minimal() +
+    theme(panel.spacing.y = unit(2, "lines"), text = element_text(size=12))
+```
+
+```{r PPT_simpSetPlot, include = FALSE}
+#Creates and saves a powerpoint friendly version of the above plot
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(SimpSet,sample,Electrode) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Electrode, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_line(aes(colour = SimpSet),size=5) +
     scale_colour_brewer(palette = "Blues") +
     scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
     scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
     theme_minimal() +
-    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=60))
+ggsave("simplifiedSetSizeERPs.pdf",width = plotWidth, height = plotHeight)
 ```
 
-
-
-
 \newpage
-
 
 ```{r create_r-references}
 r_refs(file = "NP32019_references.bib")
