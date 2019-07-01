@@ -340,6 +340,36 @@ allData %>%
     theme_minimal() +
     theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=60))
 ggsave("simplifiedSetSizeERPs.pdf",width = plotWidth, height = plotHeight)
+
+#Creates and save powerpoint friendly version of grand mean ERP of all conditions
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(sample,Electrode) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Electrode, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_line(colour = "Blue", size=5) +
+    scale_colour_brewer(palette = "Blues") +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    theme_minimal() +
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=60))
+ggsave("simplifiedSetSizeERPsAvg.pdf",width = plotWidth, height = plotHeight)
+```
+
+```{r indvsimpSetPlot, fig.cap="(ref:simpSetERPCap)"}
+#Uses implified set sizes (1/2 vs 3/4/5 vs 6/7)
+contra.small <- allData %>%
+  filter(Event == "Search", Electrode=="Contralateral",SimpSet =="Small") %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(Subject,SimpSet,sample) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Subject, mean)
+write.csv(contra.small,"EEG\\ContraData.csv", row.names = FALSE)
 ```
 
 \newpage
