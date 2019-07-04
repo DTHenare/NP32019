@@ -104,69 +104,11 @@ behavData %>%
   geom_hline(yintercept = 0.5) +
   scale_x_discrete(name ="Number of easy-coloured objects") +
   scale_y_continuous(name ="Proportion of easy target selections") +
+  guides(colour=FALSE, group = FALSE) +
   theme_apa()
 ```
 
-```{r behavSplit by choice}
-#Make group acc
-behavData %>%
-  mutate(Search.ACC = Search.ACC*100, ChoseEasy = as.factor(ChoseEasy)) %>%
-  group_by(collapseNFLR, ChoseEasy) %>%
-  summarise(Accuracy = mean(Search.ACC)) %>%
-  ggplot(., aes(collapseNFLR, Accuracy, colour = ChoseEasy, group = ChoseEasy)) +
-  geom_line(size = 2)+
-  scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
-  theme_apa()
-
-accData <- behavData %>%
-  mutate(Subject = "Average") %>%
-  mutate(Search.ACC = Search.ACC*100, ChoseEasy = as.factor(ChoseEasy)) %>%
-  group_by(collapseNFLR, ChoseEasy, Subject) %>%
-  summarise(Accuracy = mean(Search.ACC))
-behavData %>%
-  mutate(Search.ACC = Search.ACC*100, ChoseEasy = as.factor(ChoseEasy)) %>%
-  group_by(collapseNFLR, ChoseEasy, Subject) %>%
-  summarise(Accuracy = mean(Search.ACC)) %>%
-  ggplot(., aes(collapseNFLR,Accuracy, colour = Subject, group = Subject)) +
-  geom_line(alpha = 0.5) + 
-  geom_point(data = accData, size = 2.5, color = "black") + 
-  geom_line(data = accData, size = 1.5, color = "black") +
-  scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
-  facet_grid(ChoseEasy~.) +
-  theme_apa()
-
-behavData %>%
-  mutate(ChoseEasy = as.factor(ChoseEasy)) %>%
-  group_by(collapseNFLR, ChoseEasy) %>%
-  summarise(RT = mean(Search.RT)) %>%
-  ggplot(., aes(collapseNFLR, RT, colour = ChoseEasy, group = ChoseEasy)) +
-  geom_line(size = 2)+
-  scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Response Time (ms)", limits = c(500,1000)) +
-  theme_apa()
-
-rtData <- behavData %>%
-  mutate(Subject = "Average") %>%
-  mutate(ChoseEasy = as.factor(ChoseEasy)) %>%
-  group_by(collapseNFLR, ChoseEasy, Subject) %>%
-  summarise(RT = mean(Search.RT))
-behavData %>%
-  mutate(ChoseEasy = as.factor(ChoseEasy)) %>%
-  group_by(collapseNFLR, ChoseEasy, Subject) %>%
-  summarise(RT = mean(Search.RT)) %>%
-  ggplot(., aes(collapseNFLR,RT, colour = Subject, group = Subject)) +
-  geom_line(alpha = 0.5) + 
-  geom_point(data = rtData, size = 2.5, color = "black") + 
-  geom_line(data = rtData, size = 1.5, color = "black") +
-  scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Response Time (ms)", limits = c(500,1000)) +
-  facet_grid(ChoseEasy~.) +
-  theme_apa()
-```
-
-(ref:indvSubjAcc) Participant accuracy as a fucntion of set size for the easy target.
+(ref:indvSubjAcc) Participant accuracy as a fucntion of easy target set size.
 
 ```{r plotIndvSubjAccuracy, fig.cap="(ref:indvSubjAcc)"}
 #Make group acc
@@ -183,7 +125,47 @@ behavData %>%
   geom_point(data = groupAcc, size = 2.5, color = "black") +
   geom_line(data = groupAcc, size = 1.5, color = "black") +
   scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Accuracy (%)") +
+  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+```
+
+(ref:groupAccbyChoice) Participant accuracy as a fucntion of easy target set size, separated by whether participants chose to respond to the easy or the difficult target. Shading represents standard error.
+
+```{r accSplitByChoice, fig.cap="(ref:groupAccbyChoice)"}
+#Make group acc
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice) %>%
+  summarise(mean = mean(Search.ACC), se=sd(Search.ACC)/sqrt(length(Search.ACC))) %>%
+  ggplot(., aes(collapseNFLR, mean, colour = Choice, group = Choice)) +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = Choice), alpha = 0.2, colour = NA) +
+  geom_line(size = 1) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
+  theme_apa()
+```
+
+(ref:indvAccbyChoice) Participant accuracy as a fucntion of easy target set size, separated by whether participants chose to respond to the easy or the difficult target. Group mean in black and individual subjects plotted behind
+
+```{r indvAccByChoice, fig.cap="(ref:indvAccbyChoice)"}
+accData <- behavData %>%
+  mutate(Subject = "Average") %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(Accuracy = mean(Search.ACC))
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  ggplot(., aes(collapseNFLR,Accuracy, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5) + 
+  geom_point(data = accData, size = 2.5, color = "black") + 
+  geom_line(data = accData, size = 1.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
+  facet_grid(Choice~.) +
+  guides(colour=FALSE, group = FALSE) +
   theme_apa()
 ```
 
@@ -192,10 +174,12 @@ behavData %>%
 ```{r plotIndvSubjRT, fig.cap="(ref:indvSubjRT)"}
 #Make group RT
 groupRT <- behavData %>%
+  filter(Search.ACC == 1) %>%
   mutate(Subject = "Average") %>%
   group_by(collapseNFLR,Subject) %>%
   summarise(RT = mean(Search.RT))
 behavData %>%
+  filter(Search.ACC == 1) %>%
   group_by(collapseNFLR,Subject) %>%
   summarise(RT = mean(Search.RT)) %>%
   ggplot(., aes(collapseNFLR,RT, colour = Subject, group = Subject)) +
@@ -203,7 +187,49 @@ behavData %>%
   geom_point(data = groupRT, size = 2.5, color = "black") +
   geom_line(data = groupRT, size = 1.5, color = "black") +
   scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Response time (ms)") +
+  scale_y_continuous(name ="Response time (ms)", limits = c(500,1000)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+```
+
+(ref:groupRTbyChoice) Participant response times as a fucntion of easy target set size, separated by whether participants chose to respond to the easy or the difficult target. Shading represents standard error.
+
+```{r groupRTByChoice, fig.cap="(ref:groupRTbyChoice)"}
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice) %>%
+  summarise(mean = mean(Search.RT), se=sd(Search.RT)/sqrt(length(Search.RT))) %>%
+  ggplot(., aes(collapseNFLR, mean, colour = Choice, group = Choice)) +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = Choice), alpha = 0.2, colour = NA) +
+  geom_line(size = 1) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response Time (ms)", limits = c(500,1000)) +
+  theme_apa()
+```
+
+(ref:indvRTByChoice) Participant response times as a fucntion of easy target set size, separated by whether participants chose to respond to the easy or the difficult target. Group mean in black and individual subjects plotted behind
+
+```{r indvRTbyChoice, fig.cap="(ref:indvRTByChoice)"}
+rtData <- behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Subject = "Average") %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT))
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  ggplot(., aes(collapseNFLR,RT, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5) + 
+  geom_point(data = rtData, size = 2.5, color = "black") + 
+  geom_line(data = rtData, size = 1.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response Time (ms)", limits = c(500,1000)) +
+  facet_grid(Choice~.) +
+  guides(colour=FALSE, group = FALSE) +
   theme_apa()
 ```
 
@@ -566,12 +592,9 @@ allData %>%
   ggplot(., aes(sample,diff)) +
   geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 0, ymax = -1.2), fill = "mistyrose") +
     geom_line(aes(colour = EasySet),size=3) +
-    scale_color_manual(values = my_palette) +
+    scale_color_manual(values = my_palette)
 
 #Unsub individual ERPs
-N2pc.data$Subject = as.factor(N2pc.data$Subject)
-N2pc.data$sample = 250
-N2pc.data$mean = N2pc.data$mV
 allData %>%
     filter(Event == "Search") %>%
     mutate(sample = sample*2-baseline, Subject = as.factor(Subject)) %>%
@@ -586,9 +609,6 @@ allData %>%
     scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
-    theme_minimal() +
-    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=60))
-ggsave("SetSizeERPsSubtracted.pdf",width = plotWidth, height = plotHeight)
     facet_grid(Hemisphere~SimpSet) +
     theme_minimal() +
     theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=45))
