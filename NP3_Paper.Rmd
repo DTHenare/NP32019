@@ -163,7 +163,7 @@ behavData %>%
   geom_point(data = accData, size = 2.5, color = "black") + 
   geom_line(data = accData, size = 1.5, color = "black") +
   scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
+  scale_y_continuous(name ="Accuracy (%)") +
   facet_grid(Choice~.) +
   guides(colour=FALSE, group = FALSE) +
   theme_apa()
@@ -370,7 +370,7 @@ my_palette <- brewer.pal(name="Blues",n=9)[3:9]
 #Subtracted ERPs split by all set sizes
 allData %>%
   filter(Event == "Search") %>%
-  mutate(sample = sample*2-baseline) %>%
+  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
   group_by(EasySet,sample,Hemisphere) %>%
   summarise(mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
@@ -382,7 +382,7 @@ allData %>%
     scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
-    theme_minimal() +
+    theme_apa() +
     theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
 ```
 
@@ -403,7 +403,7 @@ allData %>%
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
     facet_grid(.~SimpSet) +
-    theme_minimal() +
+    theme_apa() +
     theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
 ```
 
@@ -428,7 +428,7 @@ allData %>%
     scale_y_reverse(name = expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
-    theme_minimal() +
+    theme_apa() +
     theme(panel.spacing.y = unit(2, "lines"), text = element_text(size=12))
 ```
 
@@ -447,7 +447,7 @@ allData %>%
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
     facet_grid(.~SimpSet) +
-    theme_minimal() +
+    theme_apa() +
     theme(panel.spacing.x = unit(2, "lines"), text= element_text(size=40))
 ggsave("unsubSetSizeERPs.pdf",width = plotWidth, height = plotHeight*0.66)
 #With component shaded
@@ -465,7 +465,7 @@ allData %>%
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
     facet_grid(.~SimpSet) +
-    theme_minimal() +
+    theme_apa() +
     theme(panel.spacing.x = unit(2, "lines"), text= element_text(size=40))
 ggsave("unsubSetSizeERPsshaded.pdf",width = plotWidth, height = plotHeight*0.66)
 
@@ -489,7 +489,7 @@ allData %>%
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
     facet_grid(.~SimpSet) +
-    theme_minimal() +
+    theme_apa() +
     theme(panel.spacing.x = unit(20, "lines"), text = element_text(size=60))
 ggsave("simplifiedSetSizeSplitERPs.pdf",width = plotWidth+20, height = plotHeight+5)
 
@@ -513,7 +513,7 @@ allData %>%
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
     facet_grid(Hemisphere~SimpSet) +
-    theme_minimal() +
+    theme_apa() +
     theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=45))
 ggsave("UnsubIndivERPs.pdf",width = plotWidth, height = plotHeight)
 
@@ -535,7 +535,7 @@ allData %>%
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
     facet_grid(.~SimpSet) +
-    theme_minimal() +
+    theme_apa() +
     theme(panel.spacing.x = unit(20, "lines"), text = element_text(size=60))
 ggsave("simplifiedSetSizeSplitERPsIndv.pdf",width = plotWidth+20, height = plotHeight+5)
 
@@ -556,7 +556,7 @@ allData %>%
     scale_y_reverse(name = expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
-    theme_minimal() +
+    theme_apa() +
     theme(panel.spacing.y = unit(2, "lines"), text = element_text(size=60))
 ggsave("simplifiedSetSizeERPs.pdf",width = plotWidth, height = plotHeight)
 
@@ -575,7 +575,7 @@ allData %>%
     scale_y_reverse(name = expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
-    theme_minimal() +
+    theme_apa() +
     theme(panel.spacing.y = unit(2, "lines"), text = element_text(size=60))
 ggsave("simplifiedSetSizeERPsAvg.pdf",width = plotWidth, height = plotHeight)
 
@@ -584,7 +584,7 @@ my_palette <- brewer.pal(name="Blues",n=9)[3:9]
 #Subtracted ERPs split by all set sizes
 allData %>%
   filter(Event == "Search") %>%
-  mutate(sample = sample*2-baseline) %>%
+  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
   group_by(EasySet,sample,Hemisphere) %>%
   summarise(mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
@@ -595,6 +595,8 @@ allData %>%
     scale_color_manual(values = my_palette)
 
 #Unsub individual ERPs
+colourCount = length(unique(allData$Subject))
+getPalette = colorRampPalette(brewer.pal(8, "Dark2"))
 allData %>%
     filter(Event == "Search") %>%
     mutate(sample = sample*2-baseline, Subject = as.factor(Subject)) %>%
@@ -604,13 +606,13 @@ allData %>%
     geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 15, ymax = -30), fill = "gray90") +
     geom_line(aes(colour = Subject),size=2) +
     geom_point(data = N2pc.data, size = 5) +
-    scale_colour_brewer(palette = "Dark2") +
+    scale_colour_manual(values = getPalette(colourCount)) +
     scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
     scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
     geom_vline(xintercept = 0,linetype = "dashed" ) +
     geom_hline(yintercept = 0,linetype = "dashed") +
     facet_grid(Hemisphere~SimpSet) +
-    theme_minimal() +
+    theme_apa() +
     theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=45))
 ggsave("UnsubIndivERPs.pdf",width = plotWidth, height = plotHeight)
 ```
