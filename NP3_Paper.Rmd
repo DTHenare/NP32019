@@ -98,15 +98,18 @@ behavData %>%
   mutate(totalTrials = numEasy+numDiff) %>%
   mutate(propEasy = numEasy/totalTrials) %>%
   ggplot(., aes(collapseNFLR,propEasy, colour = Subject, group = Subject)) +
-  geom_rect(aes(xmin = 0, xmax = 8, ymin = 0.5, ymax = 1)) +
-  geom_line(alpha = 0.5) +
-  geom_point(data = groupChoice, size = 2.5, color = "black") + 
-  geom_line(data = groupChoice, size = 1.5, color = "black") +
+  #geom_rect(aes(xmin = 0, xmax = Inf, ymin = 0.5, ymax = 1), fill = "deepskyblue1", alpha = 0.2, colour = NA) +
+  #geom_rect(aes(xmin = 0, xmax = Inf, ymin = 0, ymax = .5), fill = "tomato1", colour = NA) +
+  geom_line(alpha = 0.5, size = 1) +
+  geom_point(data = groupChoice, size = 3.5, color = "black") + 
+  geom_line(data = groupChoice, size = 2.5, color = "black") +
   geom_hline(yintercept = 0.5) +
   scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Proportion of easy target selections", breaks = seq(.30, 1, .10)) +
+  scale_y_continuous(limits = c(0,1),name ="Proportion of easy target selections", breaks = seq(0, 1, .25)) +
   guides(colour=FALSE, group = FALSE) +
-  theme_apa()
+  theme_apa()+
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
 ```
 
 (ref:indvSubjAcc) Participant accuracy as a fucntion of easy target set size.
@@ -433,6 +436,100 @@ allData %>%
     theme(panel.spacing.y = unit(2, "lines"), text = element_text(size=12))
 ```
 
+```{r PPT_Behav}
+behavData %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials) %>%
+  ggplot(., aes(collapseNFLR,propEasy, colour = Subject, group = Subject)) +
+  #geom_rect(aes(xmin = 0, xmax = Inf, ymin = 0.5, ymax = 1), fill = "deepskyblue1", alpha = 0.2, colour = NA) +
+  #geom_rect(aes(xmin = 0, xmax = Inf, ymin = 0, ymax = .5), fill = "tomato1", colour = NA) +
+  geom_line(alpha = 0.5, size = 1) +
+  geom_point(data = groupChoice, size = 4, color = "black") + 
+  geom_line(data = groupChoice, size = 2.5, color = "black") +
+  geom_hline(yintercept = 0.5) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(limits = c(0,1),name ="Proportion of easy target selections", breaks = seq(0, 1, .25)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa() + 
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+ggsave("Plot1.pdf",width = plotWidth/2, height = plotHeight*0.66)
+
+#Make group acc
+groupAcc <- behavData %>%
+  mutate(Subject = "Average", Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC))
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  ggplot(., aes(collapseNFLR,Accuracy, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5, size = 1) + 
+  geom_point(data = groupAcc, size = 4, color = "black") +
+  geom_line(data = groupAcc, size = 2.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()+ 
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+ggsave("Plot2.pdf",width = plotWidth/2, height = plotHeight*0.66)
+
+#Make group acc
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice) %>%
+  summarise(mean = mean(Search.ACC), se=sd(Search.ACC)/sqrt(length(Search.ACC))) %>%
+  ggplot(., aes(collapseNFLR, mean, colour = Choice, group = Choice)) +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = Choice), alpha = 0.2, colour = NA) +
+  geom_line(size = 1) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
+  theme_apa()+ 
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+ggsave("Plot3.pdf",width = plotWidth/2, height = plotHeight*0.66)
+
+groupRT <- behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(RT = mean(Search.RT))
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  ggplot(., aes(collapseNFLR,RT, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5, size = 1) +
+  geom_point(data = groupRT, size = 4, color = "black") +
+  geom_line(data = groupRT, size = 2.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response time (ms)", limits = c(500,1000)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()+ 
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+ggsave("Plot4.pdf",width = plotWidth/2, height = plotHeight*0.66)
+
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice) %>%
+  summarise(mean = mean(Search.RT), se=sd(Search.RT)/sqrt(length(Search.RT))) %>%
+  ggplot(., aes(collapseNFLR, mean, colour = Choice, group = Choice)) +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = Choice), alpha = 0.2, colour = NA) +
+  geom_line(size = 1) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response Time (ms)", limits = c(500,1000)) +
+  theme_apa()+ 
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+ggsave("Plot5.pdf",width = plotWidth/2, height = plotHeight*0.66)
+```
+
 ```{r PPT_simpSetPlot, include = FALSE}
 #Create unsubtracted ERPs without component shaded
 allData %>%
@@ -469,6 +566,28 @@ allData %>%
     theme_apa() +
     theme(panel.spacing.x = unit(2, "lines"), text= element_text(size=40))
 ggsave("unsubSetSizeERPsshaded.pdf",width = plotWidth, height = plotHeight*0.66)
+
+my_palette <- brewer.pal(name="Blues",n=9)[3:9]
+#Creates and saves a powerpoint friendly version of the above plot split lines
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
+  group_by(EasySet,sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 0, ymax = -1), fill = "mistyrose") +
+    geom_line(aes(colour = EasySet),size=5) +
+    labs(colour = "Easy Set Size") +
+    scale_color_manual(values = my_palette) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name = expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    theme_apa() +
+    theme(panel.spacing.x = unit(20, "lines"), text = element_text(size=60))
+ggsave("SetSizeERPsSubtracted.pdf",width = plotWidth+20, height = plotHeight+5)
 
 my_palette <- brewer.pal(name="Blues",n=9)[4:9]
 #Creates and saves a powerpoint friendly version of the above plot split lines
