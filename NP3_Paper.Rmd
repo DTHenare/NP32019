@@ -98,12 +98,13 @@ behavData %>%
   mutate(totalTrials = numEasy+numDiff) %>%
   mutate(propEasy = numEasy/totalTrials) %>%
   ggplot(., aes(collapseNFLR,propEasy, colour = Subject, group = Subject)) +
+  geom_rect(aes(xmin = 0, xmax = 8, ymin = 0.5, ymax = 1)) +
   geom_line(alpha = 0.5) +
   geom_point(data = groupChoice, size = 2.5, color = "black") + 
   geom_line(data = groupChoice, size = 1.5, color = "black") +
   geom_hline(yintercept = 0.5) +
   scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Proportion of easy target selections") +
+  scale_y_continuous(name ="Proportion of easy target selections", breaks = seq(.30, 1, .10)) +
   guides(colour=FALSE, group = FALSE) +
   theme_apa()
 ```
@@ -470,7 +471,6 @@ allData %>%
 ggsave("unsubSetSizeERPsshaded.pdf",width = plotWidth, height = plotHeight*0.66)
 
 my_palette <- brewer.pal(name="Blues",n=9)[4:9]
-
 #Creates and saves a powerpoint friendly version of the above plot split lines
 allData %>%
   filter(Event == "Search") %>%
