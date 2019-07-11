@@ -79,6 +79,7 @@ behavData$Subject <- as.factor(behavData$Subject)
 
 #Reorder the relevant variable factors and make table
 behavData$collapseNFLR <- factor(behavData$collapseNFLR, levels = c("One", "Two", "Three", "Four", "Five", "Six", "Seven"))
+
 ```
 
 (ref:indvSubjChoice) The proportion of trials where participants chose to respond to the easy target as a function of set size for the easy target. Greater than 50% would indicate a preference for the easy target in that condition, whereas less than 50% would indicate a preference for the difficult target in that condition.
