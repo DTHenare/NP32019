@@ -158,18 +158,43 @@ accData <- behavData %>%
   mutate(Subject = "Average") %>%
   mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
   group_by(collapseNFLR, Choice, Subject) %>%
-  summarise(Accuracy = mean(Search.ACC))
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  mutate(Accuracy = ifelse(Accuracy==0,NA,Accuracy))
 behavData %>%
   mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
   group_by(collapseNFLR, Choice, Subject) %>%
   summarise(Accuracy = mean(Search.ACC)) %>%
-  ggplot(., aes(collapseNFLR,Accuracy, colour = Subject, group = Subject)) +
+  mutate(Accuracy = ifelse(Accuracy==0,NA,Accuracy))%>%
+  ggplot(., aes(collapseNFLR,Accuracy, colour = Choice, group = Subject)) +
   geom_line(alpha = 0.5) + 
   geom_point(data = accData, size = 2.5, color = "black") + 
   geom_line(data = accData, size = 1.5, color = "black") +
   scale_x_discrete(name ="Number of easy-coloured objects") +
   scale_y_continuous(name ="Accuracy (%)") +
   facet_grid(Choice~.) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+```
+
+```{r indvAccByChoice, fig.cap="(ref:indvAccbyChoice)"}
+accData <- behavData %>%
+  mutate(Subject = "Average") %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  mutate(Accuracy = ifelse(Accuracy==0,NA,Accuracy))
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  mutate(Accuracy = ifelse(Accuracy==0,NA,Accuracy))%>%
+  ggplot(., aes(collapseNFLR,Accuracy, colour = Choice, group = interaction(Subject, Choice))) +
+  geom_line(size = 1, alpha = 0.5) + 
+  geom_point(data = accData, size = 2.5, color = "black") + 
+  geom_line(data = accData, size = 1.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)") +
+  #facet_grid(Choice~.) +
   guides(colour=FALSE, group = FALSE) +
   theme_apa()
 ```
