@@ -146,6 +146,8 @@ behavData %>%
   ggplot(., aes(collapseNFLR, mean, colour = Choice, group = Choice)) +
   geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = Choice), alpha = 0.2, colour = NA) +
   geom_line(size = 1) +
+  scale_color_manual(values=c("royalblue3", "red1"))+
+  scale_fill_manual(values=c("royalblue3", "red1"))+
   scale_x_discrete(name ="Number of easy-coloured objects") +
   scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
   theme_apa()
@@ -165,7 +167,7 @@ behavData %>%
   group_by(collapseNFLR, Choice, Subject) %>%
   summarise(Accuracy = mean(Search.ACC)) %>%
   mutate(Accuracy = ifelse(Accuracy==0,NA,Accuracy))%>%
-  ggplot(., aes(collapseNFLR,Accuracy, colour = Choice, group = Subject)) +
+  ggplot(., aes(collapseNFLR,Accuracy, colour = Subject, group = Subject)) +
   geom_line(alpha = 0.5) + 
   geom_point(data = accData, size = 2.5, color = "black") + 
   geom_line(data = accData, size = 1.5, color = "black") +
@@ -176,7 +178,7 @@ behavData %>%
   theme_apa()
 ```
 
-```{r indvAccByChoice, fig.cap="(ref:indvAccbyChoice)"}
+```{r }
 accData <- behavData %>%
   mutate(Subject = "Average") %>%
   mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
@@ -190,12 +192,37 @@ behavData %>%
   mutate(Accuracy = ifelse(Accuracy==0,NA,Accuracy))%>%
   ggplot(., aes(collapseNFLR,Accuracy, colour = Choice, group = interaction(Subject, Choice))) +
   geom_line(size = 1, alpha = 0.5) + 
-  geom_point(data = accData, size = 2.5, color = "black") + 
-  geom_line(data = accData, size = 1.5, color = "black") +
+  scale_color_manual(values=c("royalblue3", "red1"))+
+  geom_point(data = accData, size = 2.5) + 
+  geom_line(data = accData, size = 1.5) +
   scale_x_discrete(name ="Number of easy-coloured objects") +
   scale_y_continuous(name ="Accuracy (%)") +
   #facet_grid(Choice~.) +
-  guides(colour=FALSE, group = FALSE) +
+  guides( group = FALSE) +
+  theme_apa()
+
+rtData <- behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Subject = "Average") %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  mutate(RT= ifelse(RT==0,NA,RT))
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  mutate(RT= ifelse(RT==0,NA,RT)) %>%
+  ggplot(., aes(collapseNFLR,RT, colour = Choice, group = interaction(Subject, Choice))) +
+  geom_line(size = 1, alpha = 0.5) + 
+  scale_color_manual(values=c("royalblue3", "red1"))+
+  geom_point(data = rtData, size = 2.5) + 
+  geom_line(data = rtData, size = 1.5) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)") +
+  #facet_grid(Choice~.) +
+  guides( group = FALSE) +
   theme_apa()
 ```
 
@@ -207,13 +234,16 @@ groupRT <- behavData %>%
   filter(Search.ACC == 1) %>%
   mutate(Subject = "Average") %>%
   group_by(collapseNFLR,Subject) %>%
-  summarise(RT = mean(Search.RT))
+  summarise(RT = mean(Search.RT)) %>%
+  mutate(RT= ifelse(RT==0,NA,RT))
 behavData %>%
   filter(Search.ACC == 1) %>%
   group_by(collapseNFLR,Subject) %>%
   summarise(RT = mean(Search.RT)) %>%
+  mutate(RT= ifelse(RT==0,NA,RT)) %>%
   ggplot(., aes(collapseNFLR,RT, colour = Subject, group = Subject)) +
-  geom_line(alpha = 0.5) +
+  #geom_line(alpha = 0.5) +
+  geom_point() +
   geom_point(data = groupRT, size = 2.5, color = "black") +
   geom_line(data = groupRT, size = 1.5, color = "black") +
   scale_x_discrete(name ="Number of easy-coloured objects") +
@@ -230,11 +260,14 @@ behavData %>%
   mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
   group_by(collapseNFLR, Choice) %>%
   summarise(mean = mean(Search.RT), se=sd(Search.RT)/sqrt(length(Search.RT))) %>%
+  mutate(RT= ifelse(mean==0,NA,mean)) %>%
   ggplot(., aes(collapseNFLR, mean, colour = Choice, group = Choice)) +
   geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = Choice), alpha = 0.2, colour = NA) +
   geom_line(size = 1) +
+  scale_color_manual(values=c("royalblue3", "red1"))+
+  scale_fill_manual(values=c("royalblue3", "red1"))+
   scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Response Time (ms)", limits = c(500,1000)) +
+  scale_y_continuous(name ="Response Time (ms)", limits = c(500,800)) +
   theme_apa()
 ```
 
@@ -261,6 +294,34 @@ behavData %>%
   facet_grid(Choice~.) +
   guides(colour=FALSE, group = FALSE) +
   theme_apa()
+
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  ggplot(., aes(collapseNFLR,RT, colour = Choice, group = interaction(Subject,Choice))) +
+  geom_point(position = position_dodge(width=1))+
+  geom_point(data = rtData, size = 2.5) + 
+  geom_line(data = rtData, size = 1.5) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response Time (ms)", limits = c(500,1000)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+```
+
+```{r }
+aovDat <-behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT))
+aov <- aov_ez(
+  data = aovDat,
+  dv = "RT",
+  id = "Subject", 
+  within = c("collapseNFLR", "Choice")
+)
 ```
 
 ```{r organiseData}
