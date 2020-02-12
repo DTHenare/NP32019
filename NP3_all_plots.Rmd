@@ -1,0 +1,881 @@
+---
+header-includes: 
+  - \thispagestyle{empty}
+  - \usepackage{setspace}
+  - \setstretch{2}
+  - \AtBeginEnvironment{tabular}{\doublespacing}
+  - \AtBeginEnvironment{lltable}{\doublespacing}
+  - \AtBeginEnvironment{tablenotes}{\doublespacing}
+  - \captionsetup[table]{font={stretch=1.5}}
+  - \captionsetup[figure]{font={stretch=1.5}}
+  - \usepackage{booktabs}
+
+title             : "NP3"
+shorttitle        : "NP3"
+
+author: 
+  - name          : "Dion T. Henare"
+    affiliation   : "1"
+    corresponding : yes
+    address       : "Gutenbergstraße 18, 35032 Marburg"
+    email         : "dion.henare@uni-marburg.de"
+  - name          : "Jan Tunnermann"
+    affiliation   : "1"
+  - name          : "Anna Schuboe"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "Philipps-University of Marburg, Germany"
+
+author_note: |
+  Funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) – project number 222641018 – SFB/TRR 135 TP B3
+
+abstract: |
+  Abstract goes here
+
+bibliography      : ["NP32019_references.bib"]
+
+figsintext        : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+lineno            : no
+mask              : no
+
+numbersection     : no
+class             : "man"
+output            : papaja::apa6_pdf
+
+---
+
+\raggedbottom
+
+```{r setup, include = FALSE}
+set.seed(4609948)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+library(knitr)
+opts_chunk$set(echo = FALSE)
+library("papaja")
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(afex)
+library(xtable)
+library(RColorBrewer)
+```
+
+```{r organiseBehavData}
+behavData <- read.table("Behaviour/BehavData.csv",header = TRUE, sep=",")
+
+#Remove lots of the default EPrime columns
+behavData <- select(behavData,-c(ExperimentName	,Session	,Clock.Information	,DataFile.Basename	,Display.RefreshRate	,ExperimentVersion	,PracAcc	,PracRT	,RandomSeed	,RuntimeCapabilities	,RuntimeVersion	,RuntimeVersionExpected	,SessionDate	,SessionStartDateTimeUtc	,SessionTime	,StudioVersion	,totalEuro	,totalPoints	,FiveDiffLeftFar	,FiveDiffLeftNear	,FiveDiffRightFar	,FiveDiffRightNear	,FiveEasyLeftFar	,FiveEasyLeftNear	,FiveEasyRightFar	,FiveEasyRightNear	,FourDiffLeftFar	,FourDiffLeftNear	,FourDiffRightFar	,FourDiffRightNear	,FourEasyLeftFar	,FourEasyLeftNear	,FourEasyRightFar	,FourEasyRightNear	,image1x	,image1y	,image2x	,image2y	,image3x	,image3y	,image4x	,image4y	,image5x	,image5y	,image6x	,image6y	,image7x	,image7y	,image8x	,image8y	,leftImage1	,leftImage2	,leftImage3	,leftImage4	,leftImage5	,leftImage6	,leftImage7	,leftImage8	,OneDiffLeftFar	,OneDiffLeftNear	,OneDiffRightFar	,OneDiffRightNear	,OneEasyLeftFar	,OneEasyLeftNear	,OneEasyRightFar	,OneEasyRightNear	,Response.ACC	,Response.CRESP	,Response.DurationError	,Response.OnsetDelay	,Response.OnsetTime	,Response.OnsetToOnsetTime	,Response.RESP	,Response.RT	,Response.RTTime	,Response1.ACC	,Response1.CRESP	,Response1.DurationError	,Response1.OnsetDelay	,Response1.OnsetTime	,Response1.OnsetToOnsetTime	,Response1.RESP	,Response1.RT	,Response1.RTTime	,rightImage1	,rightImage2	,rightImage3	,rightImage4	,rightImage5	,rightImage6	,rightImage7	,rightImage8	,Search.DurationError	,Search.OffsetTime	,Search.OnsetDelay	,Search.OnsetTime	,SevenDiffLeftFar	,SevenDiffLeftNear	,SevenDiffRightFar	,SevenDiffRightNear	,SevenEasyLeftFar	,SevenEasyLeftNear	,SevenEasyRightFar	,SevenEasyRightNear	,SixDiffLeftFar	,SixDiffLeftNear	,SixDiffRightFar	,SixDiffRightNear	,SixEasyLeftFar	,SixEasyLeftNear	,SixEasyRightFar	,SixEasyRightNear	,ThreeDiffLeftFar	,ThreeDiffLeftNear	,ThreeDiffRightFar	,ThreeDiffRightNear	,ThreeEasyLeftFar	,ThreeEasyLeftNear	,ThreeEasyRightFar	,ThreeEasyRightNear	,TwoDiffLeftFar	,TwoDiffLeftNear	,TwoDiffRightFar	,TwoDiffRightNear	,TwoEasyLeftFar	,TwoEasyLeftNear	,TwoEasyRightFar	,TwoEasyRightNear	)
+       )
+#Remove practice trials
+behavData <- filter(behavData, Running.Block. != "Practice")
+
+#Make subejct a factor
+behavData$Subject <- as.factor(behavData$Subject)
+
+#Reorder the relevant variable factors and make table
+behavData$collapseNFLR <- factor(behavData$collapseNFLR, levels = c("One", "Two", "Three", "Four", "Five", "Six", "Seven"))
+
+```
+
+```{r totalTrialNumTable}
+behavData %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  select(-c(numEasy,numDiff)) %>%
+  spread(collapseNFLR,totalTrials)
+```
+
+(ref:indvSubjChoice) The proportion of trials where participants chose to respond to the easy target as a function of set size for the easy target. Greater than 50% would indicate a preference for the easy target in that condition, whereas less than 50% would indicate a preference for the difficult target in that condition.
+
+```{r plotIndvSubjChoice, fig.cap="(ref:indvSubjChoice)"}
+#Make group RT
+groupChoice <- behavData %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials)
+#Plot participant choices
+behavData %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials) %>%
+  ggplot(., aes(collapseNFLR,propEasy, colour = Subject, group = Subject)) +
+  #geom_rect(aes(xmin = 0, xmax = Inf, ymin = 0.5, ymax = 1), fill = "deepskyblue1", alpha = 0.2, colour = NA) +
+  #geom_rect(aes(xmin = 0, xmax = Inf, ymin = 0, ymax = .5), fill = "tomato1", colour = NA) +
+  geom_line(alpha = 0.5, size = 1) +
+  geom_point(data = groupChoice, size = 3.5, color = "black") + 
+  geom_line(data = groupChoice, size = 2.5, color = "black") +
+  geom_hline(yintercept = 0.5) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(limits = c(0,1),name ="Proportion of easy target selections", breaks = seq(0, 1, .25)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()+
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+stats <- behavData %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials)
+contrasts(stats$collapseNFLR) <- contr.poly(7)
+result <- lm(propEasy ~ 1 + collapseNFLR, data = stats)
+round(summary(result)$coefficients,3)
+```
+
+(ref:indvSubjAcc) Participant accuracy as a fucntion of easy target set size.
+
+```{r plotIndvSubjAccuracy, fig.cap="(ref:indvSubjAcc)"}
+#Make group acc
+groupAcc <- behavData %>%
+  mutate(Subject = "Average", Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC))
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  ggplot(., aes(collapseNFLR,Accuracy, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5) + 
+  geom_point(data = groupAcc, size = 2.5, color = "black") +
+  geom_line(data = groupAcc, size = 1.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+stats <- behavData %>%
+  mutate(Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC))
+contrasts(stats$collapseNFLR) <- contr.poly(7)
+result <- lm(Accuracy ~ 1 + collapseNFLR, data = stats)
+round(summary(result)$coefficients,3)
+```
+
+(ref:groupAccbyChoice) Participant accuracy as a fucntion of easy target set size, separated by whether participants chose to respond to the easy or the difficult target. Shading represents standard error.
+
+```{r accSplitByChoice, fig.cap="(ref:groupAccbyChoice)"}
+#Make group acc
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice) %>%
+  summarise(mean = mean(Search.ACC), se=sd(Search.ACC)/sqrt(length(Search.ACC))) %>%
+  ggplot(., aes(collapseNFLR, mean, colour = Choice, group = Choice)) +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = Choice), alpha = 0.2, colour = NA) +
+  geom_line(size = 1) +
+  scale_color_manual(values=c("royalblue3", "red1"))+
+  scale_fill_manual(values=c("royalblue3", "red1"))+
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
+  theme_apa()
+```
+
+(ref:indvAccbyChoice) Participant accuracy as a fucntion of easy target set size, separated by whether participants chose to respond to the easy or the difficult target. Group mean in black and individual subjects plotted behind
+
+```{r indvAccByChoice, fig.cap="(ref:indvAccbyChoice)"}
+accData <- behavData %>%
+  mutate(Subject = "Average") %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  mutate(Accuracy = ifelse(Accuracy==0,NA,Accuracy))
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  mutate(Accuracy = ifelse(Accuracy==0,NA,Accuracy))%>%
+  ggplot(., aes(collapseNFLR,Accuracy, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5) + 
+  geom_point(data = accData, size = 2.5, color = "black") + 
+  geom_line(data = accData, size = 1.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)") +
+  facet_grid(Choice~.) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+```
+
+```{r }
+accData <- behavData %>%
+  mutate(Subject = "Average") %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  mutate(Accuracy = ifelse(Accuracy==0,NA,Accuracy))
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  mutate(Accuracy = ifelse(Accuracy==0,NA,Accuracy))%>%
+  ggplot(., aes(collapseNFLR,Accuracy, colour = Choice, group = interaction(Subject, Choice))) +
+  geom_line(size = 1, alpha = 0.5) + 
+  scale_color_manual(values=c("royalblue3", "red1"))+
+  geom_point(data = accData, size = 2.5) + 
+  geom_line(data = accData, size = 1.5) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)") +
+  #facet_grid(Choice~.) +
+  guides( group = FALSE) +
+  theme_apa()
+
+rtData <- behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Subject = "Average") %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  mutate(RT= ifelse(RT==0,NA,RT))
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  mutate(RT= ifelse(RT==0,NA,RT)) %>%
+  ggplot(., aes(collapseNFLR,RT, colour = Choice, group = interaction(Subject, Choice))) +
+  geom_line(size = 1, alpha = 0.5) + 
+  scale_color_manual(values=c("royalblue3", "red1"))+
+  geom_point(data = rtData, size = 2.5) + 
+  geom_line(data = rtData, size = 1.5) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)") +
+  #facet_grid(Choice~.) +
+  guides( group = FALSE) +
+  theme_apa()
+```
+
+(ref:indvSubjRT) Participants response time as a function of set size for the easy target.
+
+```{r plotIndvSubjRT, fig.cap="(ref:indvSubjRT)"}
+#Make group RT
+groupRT <- behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  mutate(RT= ifelse(RT==0,NA,RT))
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  mutate(RT= ifelse(RT==0,NA,RT)) %>%
+  ggplot(., aes(collapseNFLR,RT, colour = Subject, group = Subject)) +
+  #geom_line(alpha = 0.5) +
+  geom_point() +
+  geom_point(data = groupRT, size = 2.5, color = "black") +
+  geom_line(data = groupRT, size = 1.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response time (ms)", limits = c(500,1000)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+```
+
+(ref:groupRTbyChoice) Participant response times as a fucntion of easy target set size, separated by whether participants chose to respond to the easy or the difficult target. Shading represents standard error.
+
+```{r groupRTByChoice, fig.cap="(ref:groupRTbyChoice)"}
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice) %>%
+  summarise(mean = mean(Search.RT), se=sd(Search.RT)/sqrt(length(Search.RT))) %>%
+  mutate(RT= ifelse(mean==0,NA,mean)) %>%
+  ggplot(., aes(collapseNFLR, mean, colour = Choice, group = Choice)) +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = Choice), alpha = 0.2, colour = NA) +
+  geom_line(size = 1) +
+  scale_color_manual(values=c("royalblue3", "red1"))+
+  scale_fill_manual(values=c("royalblue3", "red1"))+
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response Time (ms)", limits = c(500,800)) +
+  theme_apa()
+```
+
+(ref:indvRTByChoice) Participant response times as a fucntion of easy target set size, separated by whether participants chose to respond to the easy or the difficult target. Group mean in black and individual subjects plotted behind
+
+```{r indvRTbyChoice, fig.cap="(ref:indvRTByChoice)"}
+rtData <- behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Subject = "Average") %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT))
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  ggplot(., aes(collapseNFLR,RT, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5) + 
+  geom_point(data = rtData, size = 2.5, color = "black") + 
+  geom_line(data = rtData, size = 1.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response Time (ms)", limits = c(500,1000)) +
+  facet_grid(Choice~.) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  ggplot(., aes(collapseNFLR,RT, colour = Choice, group = interaction(Subject,Choice))) +
+  geom_point(position = position_dodge(width=1))+
+  geom_point(data = rtData, size = 2.5) + 
+  geom_line(data = rtData, size = 1.5) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response Time (ms)", limits = c(500,1000)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+```
+
+```{r }
+aovDat <-behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice, Subject) %>%
+  summarise(RT = mean(Search.RT))
+aov <- aov_ez(
+  data = aovDat,
+  dv = "RT",
+  id = "Subject", 
+  within = c("collapseNFLR", "Choice")
+)
+```
+
+```{r organiseData}
+dPath = 'EEG/Visuals/'
+fPrefix = 'N2pc'
+
+#####
+#Creates aggregate of all participant data (needs dPath and fPrefix)
+eFilePattern = paste(fPrefix,"*_epochs.csv", sep="")
+lFilePattern = paste(fPrefix,"*_LH.csv", sep="")
+rFilePattern = paste(fPrefix,"*_RH.csv", sep="")
+eFileList = list.files(dPath, pattern=glob2rx(eFilePattern))
+lFileList = list.files(dPath, pattern=glob2rx(lFilePattern))
+rFileList = list.files(dPath, pattern=glob2rx(rFilePattern))
+
+#create variables using first dataset
+epochInfo = read.csv(file = paste(dPath,eFileList[1], sep=""))
+epochInfo$Subject = 1
+lHemData = read.csv(file = paste(dPath,lFileList[1], sep=""), header = FALSE)
+rHemData = read.csv(file = paste(dPath,rFileList[1], sep=""), header = FALSE)
+#append the other datasets to the above variables
+for (subj in 2:length(eFileList)) {
+  curEpochInfo = read.csv(file = paste(dPath,eFileList[subj], sep=""))
+  curEpochInfo$Subject = subj
+  curLHemData = read.csv(file = paste(dPath,lFileList[subj], sep=""), header = FALSE)
+  curRHemData = read.csv(file = paste(dPath,rFileList[subj], sep=""), header = FALSE)
+  
+  epochInfo = rbind(epochInfo, curEpochInfo)
+  lHemData = rbind(lHemData, curLHemData)
+  rHemData = rbind(rHemData, curRHemData)
+}
+
+#clear stuff that I don't need
+rm(curEpochInfo,curLHemData,curRHemData, fPrefix, eFileList, eFilePattern, lFileList, lFilePattern, rFileList, rFilePattern, subj)
+#####
+#Permutation can be done at this stage using epochInfo$Hemifield = sample(epochInfo$Hemifield, replace=FALSE)
+#combine all the data together into one long table
+gathercols = colnames(lHemData)
+lHemData$Hem = "Left"
+rHemData$Hem = "Right"
+scalpData = rbind(lHemData,rHemData)
+origEpochInfo = rbind(epochInfo,epochInfo)
+
+allData <- cbind(origEpochInfo, scalpData)
+allData <- gather(allData, "sample", "voltage", gathercols, factor_key = TRUE)
+
+#Tidy variable names etc. and create any necessary variables - could use unite
+allData$sample <- as.integer(substring(allData$sample,2))
+allData <- allData %>% mutate(Hemisphere = ifelse(EasyField==Hem, "Ipsilateral", "Contralateral"))
+allData$SimpSet <- allData$EasySet
+allData$SimpSet <- recode(allData$SimpSet, "1" = "Small", "2" = "Small", "3" ="Medium", "4"="Medium", "5"="Medium", "6"="Large", "7"="Large")
+
+#clear stuff that I don't need
+rm(origEpochInfo,scalpData)
+```
+
+```{r setParams}
+baseline = 200
+plotWidth = 24
+plotHeight = 9
+
+N2pcStart = 200
+N2pcEnd = 300
+SPCNStart = 300
+SPCNEnd = 498
+```
+
+```{r countTrials, results='asis'}
+print(
+  xtable(allData %>%
+    filter(Event == "Search",sample == 1, Hemisphere == 'Contralateral') %>%
+    group_by(Subject,EasySet) %>%
+    summarise(trialCount = sum(sample)) %>%
+      spread(EasySet,trialCount)
+  ,digits = 0)
+,include.rownames = FALSE, comment = FALSE)
+```
+
+```{r ERPStats, warning=FALSE}
+N2pc.data <- allData %>%
+  mutate(sample = sample*2-baseline) %>%
+  filter(Event == "Search" & sample>N2pcStart & sample < N2pcEnd) %>%
+  group_by(SimpSet,Hemisphere,Subject) %>%
+  summarise(mV = mean(voltage))
+N2pc.data$SimpSet <- as.factor(N2pc.data$SimpSet)
+contrasts(N2pc.data$SimpSet) <- contr.poly(3)
+result <- lm(mV ~ 1 + SimpSet, data = N2pc.data)
+round(summary(result)$coefficients,3)
+N2pc.aov <- aov_ez(
+  data = N2pc.data,
+  dv = "mV",
+  id = "Subject", 
+  within = c("Hemisphere","SimpSet")
+)
+N2pc.results <- apa_print(N2pc.aov)
+
+SPCN.data <- allData %>%
+  mutate(sample = sample*2-baseline) %>%
+  filter(Event == "Search" & sample>SPCNStart & sample < SPCNEnd) %>%
+  group_by(SimpSet,Hemisphere,Subject) %>%
+  summarise(mV = mean(voltage))
+SPCN.aov <- aov_ez(
+  data = SPCN.data,
+  dv = "mV",
+  id = "Subject", 
+  within = c("Hemisphere","SimpSet")
+)
+SPCN.results <- apa_print(SPCN.aov)
+
+#Extract for SPSS
+ExportN2pc <- N2pc.data %>% unite(Condition,c("SimpSet","Hemisphere")) %>% spread(Condition,mV)
+write.csv(ExportN2pc,"EEG\\N2pcStats.csv", row.names = FALSE)
+ExportSPCN <- SPCN.data %>% unite(Condition,c("SimpSet","Hemisphere")) %>% spread(Condition,mV)
+write.csv(ExportSPCN,"EEG\\SPCNStats.csv", row.names = FALSE)
+```
+
+The results of the interaction in the 2x3 (electrode by simplified set size) ANOVA for N2pc amplitude (`r N2pc.results$full_result$Hemisphere_SimpSet`).
+
+```{r N2pcStatsTable, results='asis'}
+apa_table(
+  N2pc.results$table
+  , caption = "Results of the 2x3 repeated measures ANOVA (Hemisphere by simplified set size) for the N2pc component."
+  , note = "Note goes here."
+)
+```
+
+The results of the interaction in the 2x3 (electrode by simplified set size) ANOVA for SPCN amplitude (`r SPCN.results$full_result$Hemisphere_SimpSet`).
+
+```{r SPCNStatsTable, results='asis'}
+apa_table(
+  SPCN.results$table
+  , caption = "Results of the 2x3 repeated measures ANOVA (Hemisphere by simplified set size) for the SPCN component."
+  , note = "Note goes here."
+)
+```
+
+(ref:fullSetERPCap) Subtractracted ERPs showing the lateralized response contralateral to the side of the easy target as a function of easy set size.
+
+```{r fullSetPlot, fig.cap="(ref:fullSetERPCap)"}
+my_palette <- brewer.pal(name="Blues",n=9)[3:9]
+#Subtracted ERPs split by all set sizes
+allData %>%
+  filter(Event == "Search", Subject != 1 & Subject != 4) %>%
+  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
+  group_by(EasySet,sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_line(aes(colour = EasySet),size=1) +
+    scale_color_manual(values = my_palette) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    theme_apa() +
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
+```
+
+(ref:simpSetUnsubERPCap) Subtractracted ERPs showing the lateralized response contralateral to the side of the easy target as a function of easy set size.
+
+```{r simpSetUnsubPlot, fig.cap="(ref:simpSetUnsubERPCap)"}
+#Subtracted ERPs split by all set sizes
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(SimpSet,sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  ggplot(., aes(sample,mean)) +
+    geom_line(aes(colour = Hemisphere),size=1) +
+    scale_colour_brewer(palette = "Set1") +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    facet_grid(.~SimpSet) +
+    theme_apa() +
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
+```
+
+(ref:simpSetERPCap) Subtractracted ERPs showing the lateralized response contralateral to the side of the easy target as a function of easy set size (small=1/2, medium=3/4/5, large = 6/7).
+
+```{r simpSetPlot, fig.cap="(ref:simpSetERPCap)"}
+#Uses implified set sizes (1/2 vs 3/4/5 vs 6/7)
+my_palette <- brewer.pal(name="Blues",n=9)[4:9]
+allData %>%
+  filter(Event == "Search", Subject ==14) %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(SimpSet,sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 0, ymax = -1), fill = "mistyrose") +
+    geom_line(aes(colour = SimpSet),size=1) +
+    labs(colour = "Easy Set Size") +
+    scale_color_manual(values = my_palette) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name = expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    theme_apa() +
+    theme(panel.spacing.y = unit(2, "lines"), text = element_text(size=12))
+```
+
+```{r PPT_Behav}
+behavData %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials) %>%
+  ggplot(., aes(collapseNFLR,propEasy, colour = Subject, group = Subject)) +
+  #geom_rect(aes(xmin = 0, xmax = Inf, ymin = 0.5, ymax = 1), fill = "deepskyblue1", alpha = 0.2, colour = NA) +
+  #geom_rect(aes(xmin = 0, xmax = Inf, ymin = 0, ymax = .5), fill = "tomato1", colour = NA) +
+  geom_line(alpha = 0.5, size = 1) +
+  geom_point(data = groupChoice, size = 4, color = "black") + 
+  geom_line(data = groupChoice, size = 2.5, color = "black") +
+  geom_hline(yintercept = 0.5) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(limits = c(0,1),name ="Proportion of easy target selections", breaks = seq(0, 1, .25)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa() + 
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+ggsave("Plot1.pdf",width = plotWidth/2, height = plotHeight*0.66)
+
+#Make group acc
+groupAcc <- behavData %>%
+  mutate(Subject = "Average", Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC))
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  ggplot(., aes(collapseNFLR,Accuracy, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5, size = 1) + 
+  geom_point(data = groupAcc, size = 4, color = "black") +
+  geom_line(data = groupAcc, size = 2.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()+ 
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+ggsave("Plot2.pdf",width = plotWidth/2, height = plotHeight*0.66)
+
+#Make group acc
+behavData %>%
+  mutate(Search.ACC = Search.ACC*100, Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice) %>%
+  summarise(mean = mean(Search.ACC), se=sd(Search.ACC)/sqrt(length(Search.ACC))) %>%
+  ggplot(., aes(collapseNFLR, mean, colour = Choice, group = Choice)) +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = Choice), alpha = 0.2, colour = NA) +
+  geom_line(size = 1) +
+  scale_color_manual(values=c("royalblue3", "red1"))+
+  scale_fill_manual(values=c("royalblue3", "red1"))+
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
+  theme_apa()+ 
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+ggsave("Plot3.pdf",width = plotWidth/2, height = plotHeight*0.66)
+
+groupRT <- behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(RT = mean(Search.RT))
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  ggplot(., aes(collapseNFLR,RT, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5, size = 1) +
+  geom_point(data = groupRT, size = 4, color = "black") +
+  geom_line(data = groupRT, size = 2.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response time (ms)", limits = c(500,1000)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()+ 
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+ggsave("Plot4.pdf",width = plotWidth/2, height = plotHeight*0.66)
+
+behavData %>%
+  filter(Search.ACC == 1) %>%
+  mutate(Choice = ifelse(ChoseEasy == 1,"Chose Easy", "Chose Difficult")) %>%
+  group_by(collapseNFLR, Choice) %>%
+  summarise(mean = mean(Search.RT), se=sd(Search.RT)/sqrt(length(Search.RT))) %>%
+  ggplot(., aes(collapseNFLR, mean, colour = Choice, group = Choice)) +
+  geom_ribbon(aes(ymin = mean - se, ymax = mean + se, fill = Choice), alpha = 0.2, colour = NA) +
+  geom_line(size = 1) +
+  scale_color_manual(values=c("royalblue3", "red1"))+
+  scale_fill_manual(values=c("royalblue3", "red1"))+
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response Time (ms)", limits = c(500,800)) +
+  theme_apa()+ 
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+ggsave("Plot5.pdf",width = plotWidth/2, height = plotHeight*0.66)
+```
+
+```{r PPT_simpSetPlot, include = FALSE}
+#Create unsubtracted ERPs without component shaded
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(SimpSet,sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  ggplot(., aes(sample,mean)) +
+    geom_line(aes(colour = Hemisphere),size=2) +
+    scale_colour_brewer(palette = "Set1") +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    facet_grid(.~SimpSet) +
+    theme_apa() +
+    theme(panel.spacing.x = unit(2, "lines"), text= element_text(size=40))
+ggsave("unsubSetSizeERPs.pdf",width = plotWidth, height = plotHeight*0.66)
+#With component shaded
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(SimpSet,sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  ggplot(., aes(sample,mean)) +
+    geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 3, ymax = -9), fill = "mistyrose") +
+    geom_line(aes(colour = Hemisphere),size=1) +
+    scale_colour_brewer(palette = "Set1") +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0), limits = c(5,-15)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    facet_grid(.~SimpSet) +
+    theme_apa() +
+    theme(panel.spacing.x = unit(2, "lines"), text= element_text(size=40))
+ggsave("unsubSetSizeERPsshaded.pdf",width = plotWidth, height = plotHeight*0.66)
+
+my_palette <- brewer.pal(name="Blues",n=9)[3:9]
+#Creates and saves a powerpoint friendly version of the above plot split lines
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
+  group_by(EasySet,sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 0, ymax = -1), fill = "mistyrose") +
+    geom_line(aes(colour = EasySet),size=5) +
+    labs(colour = "Easy Set Size") +
+    scale_color_manual(values = my_palette) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name = expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    theme_apa() +
+    theme(panel.spacing.x = unit(20, "lines"), text = element_text(size=60))
+ggsave("SetSizeERPsSubtracted.pdf",width = plotWidth+20, height = plotHeight+5)
+
+my_palette <- brewer.pal(name="Blues",n=9)[4:9]
+#Creates and saves a powerpoint friendly version of the above plot split lines
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(SimpSet,sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 0, ymax = -1), fill = "mistyrose") +
+    geom_line(aes(colour = SimpSet),size=5) +
+    labs(colour = "Easy Set Size") +
+    scale_color_manual(values = my_palette) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name = expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    facet_grid(.~SimpSet) +
+    theme_apa() +
+    theme(panel.spacing.x = unit(20, "lines"), text = element_text(size=60))
+ggsave("simplifiedSetSizeSplitERPs.pdf",width = plotWidth+20, height = plotHeight+5)
+
+
+#Unsub individual ERPs
+N2pc.data$Subject = as.factor(N2pc.data$Subject)
+N2pc.data$sample = 250
+N2pc.data$mean = N2pc.data$mV
+allData %>%
+    filter(Event == "Search") %>%
+    mutate(sample = sample*2-baseline, Subject = as.factor(Subject)) %>%
+    group_by(SimpSet,Subject, sample,Hemisphere) %>%
+    summarise(mean = mean(voltage)) %>%
+    ggplot(., aes(sample,mean)) +
+    geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 15, ymax = -30), fill = "gray90") +
+    geom_line(aes(colour = Subject),size=2) +
+    geom_point(data = N2pc.data, size = 5) +
+    scale_colour_brewer(palette = "Dark2") +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    facet_grid(Hemisphere~SimpSet) +
+    theme_apa() +
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=45))
+ggsave("UnsubIndivERPs.pdf",width = plotWidth, height = plotHeight)
+
+#Subtracted split by condition across 3 plots with individual ERPs
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline, Subject = as.factor(Subject)) %>%
+  group_by(SimpSet,Subject,sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 0, ymax = -2.5), fill = "mistyrose") +
+    geom_line(aes(colour = Subject),size=5) +
+    labs(colour = "Easy Set Size") +
+    scale_colour_brewer(palette = "Blues") +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name = expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    facet_grid(.~SimpSet) +
+    theme_apa() +
+    theme(panel.spacing.x = unit(20, "lines"), text = element_text(size=60))
+ggsave("simplifiedSetSizeSplitERPsIndv.pdf",width = plotWidth+20, height = plotHeight+5)
+
+#Creates and saves a powerpoint friendly version of the above plot
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(SimpSet,sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 0, ymax = -1), fill = "mistyrose") +
+    geom_line(aes(colour = SimpSet),size=5) +
+    labs(colour = "Easy Set Size") +
+    scale_color_manual(values = my_palette) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name = expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    theme_apa() +
+    theme(panel.spacing.y = unit(2, "lines"), text = element_text(size=60))
+ggsave("simplifiedSetSizeERPs.pdf",width = plotWidth, height = plotHeight)
+
+#Creates and save powerpoint friendly version of grand mean ERP of all conditions
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 0, ymax = -1), fill = "mistyrose") +
+    geom_line(colour = "Blue",size=5) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name = expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    theme_apa() +
+    theme(panel.spacing.y = unit(2, "lines"), text = element_text(size=60))
+ggsave("simplifiedSetSizeERPsAvg.pdf",width = plotWidth, height = plotHeight)
+
+
+my_palette <- brewer.pal(name="Blues",n=9)[3:9]
+#Subtracted ERPs split by all set sizes
+allData %>%
+  filter(Event == "Search") %>%
+  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
+  group_by(EasySet,sample,Hemisphere) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+  geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 0, ymax = -1.2), fill = "mistyrose") +
+    geom_line(aes(colour = EasySet),size=3) +
+    scale_color_manual(values = my_palette)
+
+#Unsub individual ERPs
+colourCount = length(unique(allData$Subject))
+getPalette = colorRampPalette(brewer.pal(8, "Dark2"))
+allData %>%
+    filter(Event == "Search") %>%
+    mutate(sample = sample*2-baseline, Subject = as.factor(Subject)) %>%
+    group_by(SimpSet,Subject, sample,Hemisphere) %>%
+    summarise(mean = mean(voltage)) %>%
+    ggplot(., aes(sample,mean)) +
+    geom_rect(aes(xmin = N2pcStart, xmax = N2pcEnd, ymin = 15, ymax = -30), fill = "gray90") +
+    geom_line(aes(colour = Subject),size=2) +
+    geom_point(data = N2pc.data, size = 5) +
+    scale_colour_manual(values = getPalette(colourCount)) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    facet_grid(Hemisphere~SimpSet) +
+    theme_apa() +
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=45))
+ggsave("UnsubIndivERPs.pdf",width = plotWidth, height = plotHeight)
+```
+
+```{r indvsimpSetPlot, include = FALSE}
+#Uses implified set sizes (1/2 vs 3/4/5 vs 6/7)
+ERPPlotdata <- allData %>%
+  mutate(sample = sample*2-baseline) %>%
+  filter(Event == "Search") %>%
+  group_by(sample, SimpSet,Hemisphere) %>%
+  summarise(mV = mean(voltage))  %>% 
+  unite(Condition,c("SimpSet","Hemisphere")) %>% 
+  spread(Condition,mV)
+write.csv(ERPPlotdata,"EEG\\ERPPlots.csv", row.names = FALSE)
+```
+
+\newpage
+
+```{r create_r-references}
+r_refs(file = "NP32019_references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id = "refs"></div>
+\endgroup
