@@ -45,7 +45,7 @@ mask              : no
 
 numbersection     : no
 class             : "man"
-output            : papaja::apa6_pdf
+output            : papaja::apa6_word
 
 ---
 
@@ -117,7 +117,7 @@ behavData %>%
   scale_y_continuous(limits = c(0,1),name ="Proportion of easy target selections", breaks = seq(0, 1, .25)) +
   guides(colour=FALSE, group = FALSE) +
   theme_apa()+
-  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+  theme(axis.line = element_line(color = "black", 
                            size = 1, linetype = "solid"))
 stats <- behavData %>%
   group_by(collapseNFLR,Subject) %>%
@@ -324,7 +324,7 @@ ggplot(N2pc.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject))
   scale_y_continuous(name ="N2pc Amplitude") +
   guides(colour=FALSE, group = FALSE) +
   theme_apa()+
-  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+  theme(axis.line = element_line(color = "black", 
                            size = 1, linetype = "solid"))
 N2pc.data %>%
   group_by(EasySet) %>%
@@ -378,9 +378,9 @@ ggplot(P1pc.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject))
   geom_line(data = groupP1pc, size = 2.5, color = "black") +
   scale_x_discrete(name ="Easy set-size") +
   scale_y_continuous(name ="P1pc Amplitude") +
-  #guides(colour=FALSE, group = FALSE) +
+  guides(colour=FALSE, group = FALSE) +
   theme_apa()+
-  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+  theme(axis.line = element_line(color = "black", 
                            size = 1, linetype = "solid"))
 P1pc.data %>%
   group_by(EasySet) %>%
@@ -421,7 +421,7 @@ ggplot(SPCN.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject))
   scale_y_continuous(name ="SPCN Amplitude") +
   guides(colour=FALSE, group = FALSE) +
   theme_apa()+
-  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+  theme(axis.line = element_line(color = "black", 
                            size = 1, linetype = "solid"))
 SPCN.data %>%
   group_by(EasySet) %>%
