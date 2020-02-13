@@ -312,6 +312,20 @@ N2pc.data <- allData %>%
   spread(Hemisphere,mV) %>%
   mutate(diff = Contralateral - Ipsilateral)
 #plot values
+groupN2pc <- N2pc.data %>%
+  mutate(Subject = "Average") %>%
+  group_by(EasySet, Subject) %>%
+  summarise(diff = mean(diff))
+ggplot(N2pc.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5, size = 1) +
+  geom_point(data = groupN2pc, size = 3.5, color = "black") + 
+  geom_line(data = groupN2pc, size = 2.5, color = "black") +
+  scale_x_discrete(name ="Easy set-size") +
+  scale_y_continuous(name ="N2pc Amplitude") +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()+
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
 N2pc.data %>%
   group_by(EasySet) %>%
   summarise(diff = mean(diff)) %>%
@@ -354,6 +368,20 @@ P1pc.data <- allData %>%
   spread(Hemisphere,mV) %>%
   mutate(diff = Contralateral - Ipsilateral)
 #plot values
+groupP1pc <- P1pc.data %>%
+  mutate(Subject = "Average") %>%
+  group_by(EasySet, Subject) %>%
+  summarise(diff = mean(diff))
+ggplot(P1pc.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5, size = 1) +
+  geom_point(data = groupP1pc, size = 3.5, color = "black") + 
+  geom_line(data = groupP1pc, size = 2.5, color = "black") +
+  scale_x_discrete(name ="Easy set-size") +
+  scale_y_continuous(name ="P1pc Amplitude") +
+  #guides(colour=FALSE, group = FALSE) +
+  theme_apa()+
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
 P1pc.data %>%
   group_by(EasySet) %>%
   summarise(diff = mean(diff)) %>%
@@ -381,6 +409,20 @@ SPCN.data <- allData %>%
   spread(Hemisphere,mV) %>%
   mutate(diff = Contralateral - Ipsilateral)
 #plot values
+groupSPCN <- SPCN.data %>%
+  mutate(Subject = "Average") %>%
+  group_by(EasySet, Subject) %>%
+  summarise(diff = mean(diff))
+ggplot(SPCN.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5, size = 1) +
+  geom_point(data = groupSPCN, size = 3.5, color = "black") + 
+  geom_line(data = groupSPCN, size = 2.5, color = "black") +
+  scale_x_discrete(name ="Easy set-size") +
+  scale_y_continuous(name ="SPCN Amplitude") +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()+
+  theme(text= element_text(size=22),axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
 SPCN.data %>%
   group_by(EasySet) %>%
   summarise(diff = mean(diff)) %>%
