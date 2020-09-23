@@ -21,6 +21,10 @@ author:
     email         : "dion.henare@uni-marburg.de"
   - name          : "Jan Tunnermann"
     affiliation   : "1"
+  - name          : "Ilja Wagner"
+    affiliation   : "1"
+  - name          : "Alexander C. Schütz"
+    affiliation   : "1"
   - name          : "Anna Schuboe"
     affiliation   : "1"
 
@@ -68,7 +72,41 @@ library(emmeans)
 
 # Introduction
 
+A central goal of the field of cognitive science is to understand how the human visual system prioritses relevant stimuli for high level processing while ignoring irrelevant noise. Seminal work in this literature has relied on a broad set of experimental paradigms where participants search for predefined targets amoung a set of irrelevant distractor or filler objects. 
+
+In everyday situations, however, we are often faced with the challlenge of not simply finding a specific target, but optimising our performance in a context where multiple possible targets are present. 
+
+Recent work has started to expand on experimental paradigms in order to incorporate target choice processes. Irons and leber 2015/2016
+
+EEG studies examining selective attention have identified a lateralised ERP component that has p
+
 # Methods
+
+## Participants
+
+## Task 
+
+### Calibration session
+
+### EEG session
+
+Each trial began with a 500ms fixation followed by a search display that was shown for 500ms, and then a fixation display lasting until response (uo to a maximum of 1500ms). The search display consisted of 16 rings, eight rings to the left of fixation and eight rings to the right of fixation. The rings on each side were arranged in two columns of four, and the layout of each column was curved to ensure that rings within a column were equidistant from fixation. In this way, stimuli can be thought of as falling along the imaginary line of either an inner or outer circle around fixation. Each ring contained a rounded rectangle with a gap in the centre of one of the long sides. One of these rectangles was oriented horizontally, one of these rectangles was oriented vertically, and the remaining 14 rectangles were tilted at a 45 degree angle. Participants were required to select either the vertical or horizontal rectangle, and indicate the edge that contained a gap. Responses were made on an ergodex key pad using keys arranged like the arrow keys of a standard computer keyboard. The two target rectangles were always presented on opposite sides of fixation, one left and one right, with the restriction that they would always be the same distance from fixation ie. both targets would be presented on the inner circle of rings, or both on the outer circle. 
+
+Two factors were manipulated in order to affect participant performance. Firstly, the two targets differed with regard to the difficulty of the gap judgement. One rectangle contained a smaller gap size that was calibrated to be reportable on approximately 65% of trials, whereas the other rectangle contained a larger gap size that was calibrated to be reportable on approximately 90% of trials. 
+
+Secondly, possible target locations were highlighted by colouring a portion of the rings either red or blue. Locations of the coloured rings were randomly determined on each trial, however there were always eight coloured rings on screen in total. Therefore, the ratio of red to blue rings varied across trials from 1:7 to 7:1 (with an even distribution of every possible ratio). For each participant, one of the colours highlighted the possible locations of the easy target, and the other colour highlighted the possible locations of the difficult target. Within each trial, "difficult colour" rings were all presented on one side of fixation, and "easy colour" rings were all presented on the other side of fixation. As a result, the set size for a given difficulty varied as the proportion of red to blue rings varied. If red is associated with the easy judgement, then on trials with one red and 7 blue rings, participants could benefit from directing attention to the easy target immediately and responding. On the other hand, if there were seven red rings and only one blue, participants would have to decide whether to allocate their attention immediately to the difficult rectangle and attempt a judgment, or whether they would prefer to search through the seven red rings to find the easy rectangle and make their judgement.
+
+
+
+## Stimuli
+
+## Experimental procedure
+
+## EEG recording
+
+## EEG Processing
+
+## Statistical analysis
 
 # Results
 
@@ -129,7 +167,7 @@ result <- lm(propEasy ~ 1 + collapseNFLR, data = stats)
 round(summary(result)$coefficients,3)
 ```
 
-(ref:indvSubjAcc) Participant accuracy as a fucntion of easy target set size.
+(ref:indvSubjAcc) Participant accuracy as a function of easy target set size.
 
 ```{r plotIndvSubjAccuracy, fig.cap="(ref:indvSubjAcc)"}
 #Make group acc
