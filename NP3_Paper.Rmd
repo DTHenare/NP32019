@@ -68,168 +68,153 @@ library(afex)
 library(xtable)
 library(RColorBrewer)
 library(emmeans)
+library(patchwork)
+```
+
+```{r functions}
+visAngle <- function(size, distance){
+  # this function calculates visual angle
+  # size and distance must be in the same units
+  Rad = 2*atan(size/(2*distance))
+  Ang = Rad*(180/pi)
+  return(Ang)
+}
 ```
 
 # Introduction
 
-A central goal of the field of cognitive science is to understand how the human visual system prioritses relevant stimuli for high level processing while ignoring irrelevant noise. Seminal work in this literature has relied on a broad set of experimental paradigms where participants search for predefined targets amoung a set of irrelevant distractor or filler objects. 
+```{r }
+#In everyday life, the visual field contains multiple objects of interest that vary along many different dimensions including salience, relevance to current goals, and value. A central goal of the field of cognitive science is to understand how the human visual system prioritses relevant targets for high level processing while ignoring irrelevant noise. 
 
-In everyday situations, however, we are often faced with the challlenge of not simply finding a specific target, but optimising our performance in a context where multiple possible targets are present. 
+#Seminal work in this literature has relied on a broad set of experimental paradigms where participants search for predefined targets amoung a set of irrelevant distractor or filler objects. Targets can be defined in a number of ways, for example, by being confined to a specific location, possessing a specific feature, or by more abstract criteria like being an oddball or member of a semantic category.
+#oddball detection [@bacon1994overriding;@pashler1988cross], relative features (e.g. "redder" items; @becker2010role, @becker2013attentional), and semantic categories [@barnard2004paying;@leblanc2007can;@wyble2009categorically;@wyble2013contingent].
 
-Recent work has started to expand on experimental paradigms in order to incorporate target choice processes. Irons and leber 2015/2016
+#Additional understanding of attentional control and prioritisation has come from the use of EEG to record neural activity while participants perform search tasks. In particular, a component of the event-related potential referred to as N2pc has been used to probe the attention system and measure attention allocation. N2pc is measured as an enhacned negativity at posterior electrode sites contralateral to an attended stimulus (relative to equivalent ipsilateral sites), ocurring approximately 200ms post-stimulus. First described by Luck et al
 
-EEG studies examining selective attention have identified a lateralised ERP component that has p
+#In everyday situations, however, we are often faced with the challlenge of not simply finding a specific target, but optimising our performance in a context where multiple possible targets are present. 
+
+#Recent work has started to expand on experimental paradigms in order to incorporate target choice processes. Irons and leber 2015/2016
+
+#EEG studies examining selective attention have identified a lateralised ERP component that has p
+
+#######The limited capacity of the human visual system means that optimal funcitioning requires assigning priority to the various objects present in a typical visual scene. Limited resources can then be directed toward high priority objects while low priority objects get suppressed or ignored. A large body of research has therefore attempted to understand how it is that priority is assigned to objects in a display. Factors such as salience and goal relevance are classic factors that have been investigated and recently an individual’s previous selection history has also been shown to affect current attention allocation.
+
+#######In the vast majority of visual search tasks which aim to understand attention allocation, participants are assigned a target object by the experimenter and search for this object on each trial. In real world visual scenes, however, there may be a number of ways of achieving and individual’s goals and therefore more than one object which could be selected as the target. Fr example… In this study, we aimed to understand the factors which influence which objects a person chooses to attend to, and observe the effect of this choice on attention allocation.
+
+#A number of studies have established that the ease of finding a target can have significant impact on participants' search strategies and target choice. In the subset search task, for example, participants are required to search for a target that is defined by a conjunction of colour and shape amoungst two types of distractors which each possess one of the target features. When the number of each distractor type is manipulated, results show that participants typically adapt their search strategy in order to search through the smaller set of possible targets (Egeth, Virzi, & Garbart, 1984; Shen, Reingold, & Pomplun, 2000; Sobel & Cave, 2002).
+
+#The implication of these findings is that as the set size of a feature increases, and therefore the ability to locate/identify a target in that set decreases, participants flexibly adjust their strategy in order to attend to the smaller set size.
+
+#OR
+
+#In everyday...
+
+#Attnetion is critical
+
+#these paradigms define single target though and can therefore say nothing about how attetnnio impacts on more realistic task demands where target choice is open to the participant and affected by tradeoffs
+
+#A number of studies have established that ease of finding..
+
+#The results of irons an leber also highlighted effort minimisation.
+
+#while we have a strong understanding of attention allocation in constrained tasks, and know that participant decisions can affected by the complex interaction of multiple factors, there is currently a gap in our understanding of the role that attention plays in this kind of complex decisions making under more realistic task demands.
+
+#In this study we aim to understand the role that early stages of attention play in directing downst4eam choice behaviour for realistic tak demands.
+
+#In the field of visual search EEG has proided signifiant insights into attetnion processing by allowign a dissociatino of neural processes of attentino from manual responses that are initiated much later
+
+#Therefore, in the current experiment we devised a novel paradigm which allows participants to choose between two different targets on each trial while manipulating two factors that are presumed to affect their choice. Set size and difficulty. Stimulus displays were arranged such that it would be possible to record lateralised ERP components in repsonse to the displays and therefore probe the early stages of attention and their relation to later choice behaviour.
+```
+
+In everyday environments people need to make choices about where to allocate their limited cognitive resources in order to maximise their performance. In most situations the optimal choice may not be immediately obvious, as many factors that impact on decision making can trade-off against each other. For example when searching for food, some items may be easily located but difficult to access, in which case people may instead opt for items that are less easy to find but offer easier accessibility once they are found. Complex decisions like this are prevalent in everyday life, however, there is a large gap in our understanding of the processes involved in these kinds of trade-offs and whether decision making in this case is optimised.
+
+`r #target identificationXdiscriminability/set sizeXtask difficulty/`
+
+In the field of cognitive neuroscience, the attention system is presumed to be central to this type of search optimisation. Attention is typically considered a gating mechanism for the vast amount of information available in the outside world, and is therefore the mechanism by which we isolate relevant, and important information while ignoring irrelevant and distracting information. Seminal work in this literature has relied on a broad set of experimental paradigms where participants search for predefined targets amoung a set of irrelevant distractor or filler objects. Targets can be defined in a number of ways, for example, by being confined to a specific location, possessing a specific feature, or by more abstract criteria like being an oddball [@bacon1994overriding;@pashler1988cross] or member of a semantic category [@barnard2004paying;@leblanc2007can;@wyble2009categorically;@wyble2013contingent]. Results consistently show that stimuli matching the target criteria benefit from enhanced processing as a consequence of attention allocation. Additionally, targets can be defined by a conjunction of features, in which case participants adapt their search strategy in order to focus on the feature that most efficiently limits how many items they must search through (Egeth, Virzi, & Garbart, 1984; Shen, Reingold, & Pomplun, 2000; Sobel & Cave, 2002). In the vast majority of visual search tasks demonstrating the role that attention plays in optimising search performance, participants are assigned the target object by an experimenter and then search for this object on each trial. In real world visual scenes, however, there may be a number of ways of achieving an individual’s goals and therefore more than one object which could be selected as the target.
+
+Recently, researchers have started to use paradgims with more realistic task demands in as much as they offer participants some choice over how they respond on each trial. Navalpakkama, Koch, Rangelc, and Peronab (2010) used a search task in which participants could choose to respond to either the horizontal or vertical bar in a circle of distractors. They manipulated two factors that have been shown to separately affect attention, namely, the physical salience and reward value of the two target bars. Their results showed that participants were able to dynamically trade-off between these two factors in order to optimally respond to the displays and maximise their reward. A similar effect was observed by Irons and Leber (2016) who used a paradigm in which participants can choose to respond to either a red or blue target on each trial. When they manipulate the ratio of red to blue distractors across trials in a predicatable fashion, their results showed that participants will often switch their target preference based on the distractor set size. In effect, people will opt for the blue target when there are a small number of blue items to search through, and switch to the red target when there are a small number of red items.
+
+The results of Irons and Leber (2016) also highlighted the role that effort minimisation plays in participant choices. In their case, the ratio of blue to red distractors changed predictably and gradually across trials, such that participants moved from contexts dominated by one colour, through contexts in which it was balanced, to contexts dominated by the opposing colour. Results showed that rather than switching target as soon as the displays moved past the balanced point, participants had a small delay in when they finally decided to switch target. The explanation for this was that switching target templates itself requires some amount of effort and therefore effort minimisation incentivised participants to stay on the current target choice for some time after it became a member of the larger set size. Similar effects are observed in voluntary task swtiching paradigms where participants are performing two intermingled tasks but have a choice over which task to perform on each trial. Results from these studies show a consistent stay preference, in which participants are more likely to repeat the previous task when given a choice than switch to the opposing task (refs). Fndings involving set size and effort minimisation suggest that when task demands are more open, and complex, participant responses imply an attempt at navigating these opposing factors to behave efficiently.
+
+While studies like these have established that a person's choices reflect the outcome of a flexible and dynamic process which aims to optimise their performance, we do not yet understand the role that early stages of attention play in directing downstream choice behviour. One might assume that objects which grab attention in the early stages of processing are more likely to be chosen for action at later stages. However, this need not be the case. It is plossible that while attention proceses play a role in identifying the set of possible items of interest, that the intervening period between initial attentional biases and later choice behaviour allows for individuals to contradict the objects which grabbed attention. The studies outlined above incorporating open task demands have typically relied on the measurement of overt behaviours like manual responses. By focusing on the final output of neural processing these studies are limited in their ability to dissociate the role of early visual processes from later, high level decisional processes.  `r #(single trial analyses to ook at N2pc precedig fast vs slow choices? as index of attenion leading choice) Or it could be that choice drives attention. Selecetd item, assuming it achieves goal, is reinforced for selection next time (in this case, correct trials would lead to larger N2pc for same choice obejct, and highger chance of reselecting - incorrect trials would not, but return to 50% rather than become aversive?). `
+
+In the field of visual attention, a detailed understanding of attentional control and prioritisation has benefitted from the use of EEG to record neural activity while participants perform search tasks. In particular, a component of the event-related potential referred to as N2pc has been used to probe the attention system and measure attention allocation. N2pc is measured as an enhanced negativity at posterior electrode sites contralateral to an attended item, ocurring approximately 200ms post-stimulus onset. Not only does the presence of an N2pc indicate the visual field in which attention has been deployed, but the amplitude of the N2pc component appears to index the efficiency of selection in that location. N2pc is larger for eg. when...
+
+In the present experiemtn we aimed to evaluate the impact that initial attentional biases have on driving downstream decisions using a paradigm which allows 
+
+```{r}
+##### gottlieb
+#empirical and computational approaches have portrayed vision as starting with a passive input stage that simply registers the available information (Blake & Yuille, 1992; Tsotsos, 2011), the active control of eye movements makes it clear that people, like other animals, actively sample (or select) the information they are interested in. Information sampling is therefore a highly active process (Blake & Yuille, 1992; Tsotsos, 2011), in which the brain actively seeks out and focuses on interesting sources of information.
+
+#To understand active sampling, therefore, we must think of shifts of gaze or attention as proactive acts that request specific types of information in order to obtain a better view of that information.
+```
 
 # Methods
 
 ## Participants
 
-## Task 
+```{r demoData}
+demoData <- read.table("Behaviour/demographics.csv",header = TRUE, sep=",")
+summary <- demoData %>% filter(EEG == 1) %>% 
+  mutate(Sex = ifelse(Sex == 'f',1,0)) %>% 
+  summarise(N = n(), numF = sum(Sex), meanAge = mean(Age), minAge = min(Age), maxAge = max(Age), sdAge = sd(Age))
+```
 
-### Calibration session
-
-### EEG session
-
-Each trial began with a 500ms fixation followed by a search display that was shown for 500ms, and then a fixation display lasting until response (uo to a maximum of 1500ms). The search display consisted of 16 rings, eight rings to the left of fixation and eight rings to the right of fixation. The rings on each side were arranged in two columns of four, and the layout of each column was curved to ensure that rings within a column were equidistant from fixation. In this way, stimuli can be thought of as falling along the imaginary line of either an inner or outer circle around fixation. Each ring contained a rounded rectangle with a gap in the centre of one of the long sides. One of these rectangles was oriented horizontally, one of these rectangles was oriented vertically, and the remaining 14 rectangles were tilted at a 45 degree angle. Participants were required to select either the vertical or horizontal rectangle, and indicate the edge that contained a gap. Responses were made on an ergodex key pad using keys arranged like the arrow keys of a standard computer keyboard. The two target rectangles were always presented on opposite sides of fixation, one left and one right, with the restriction that they would always be the same distance from fixation ie. both targets would be presented on the inner circle of rings, or both on the outer circle. 
-
-Two factors were manipulated in order to affect participant performance. Firstly, the two targets differed with regard to the difficulty of the gap judgement. One rectangle contained a smaller gap size that was calibrated to be reportable on approximately 65% of trials, whereas the other rectangle contained a larger gap size that was calibrated to be reportable on approximately 90% of trials. 
-
-Secondly, possible target locations were highlighted by colouring a portion of the rings either red or blue. Locations of the coloured rings were randomly determined on each trial, however there were always eight coloured rings on screen in total. Therefore, the ratio of red to blue rings varied across trials from 1:7 to 7:1 (with an even distribution of every possible ratio). For each participant, one of the colours highlighted the possible locations of the easy target, and the other colour highlighted the possible locations of the difficult target. Within each trial, "difficult colour" rings were all presented on one side of fixation, and "easy colour" rings were all presented on the other side of fixation. As a result, the set size for a given difficulty varied as the proportion of red to blue rings varied. If red is associated with the easy judgement, then on trials with one red and 7 blue rings, participants could benefit from directing attention to the easy target immediately and responding. On the other hand, if there were seven red rings and only one blue, participants would have to decide whether to allocate their attention immediately to the difficult rectangle and attempt a judgment, or whether they would prefer to search through the seven red rings to find the easy rectangle and make their judgement.
-
-
-
-## Stimuli
+In total, `r printnum(length(demoData$Subj))` participants were recruited to participate in the experiment, however `r printnum(length(demoData$EEG[demoData$EEG==0]))` participants could not perform the task accurately in the first session and therefore they were not invited back for the EEG session and there data was not used. Of the `r printnum(summary$N)` particpants who completed both sessions, `r printnum(summary$numF, digits = 0)` were female, and all were right-handed. Ages ranged from `r printnum(summary$minAge)` to `r printnum(summary$maxAge)`, and the mean age was `r printnum(summary$meanAge)` (SD = `r printnum(summary$sdAge)`).
 
 ## Experimental procedure
 
+Participants were tested in two separate sessions that were no more than 2 days apart. In the first session, behavioural tasks were used in order to calibrate the two difficulty levels that were required for day two, and fixation control was implemented using an eye-tracker in order to train participants to maintain fixation. In order to attain a difficult and an easy gap size for each person, a staircase procedure was used to find the gap sizes that resulted in 65% accuracy and 90% accuracy respectively. In the second session, participants were set up for EEG recording and repeated a short version of the staircase procedure in order to help both remind them of the task and to remove any practice effects. Participants then started the EEG task. This began with a short practice period in which participants completed blocks of trials until their average accuracy on the most recent block exceeded 65%. They then moved on to the full experiment which ran for 30 minutes (plus breaks). Participants were rewarded with one point for each correct answer and were therefore encouraged to perform the taks as quickly and accurately as possible in order to maximise their earnings within the 30 minute time limit. 
+56 trials per block. On average people completed X trials in the time limit. Min/max/sd blah blah
+
+## Experimental tasks
+
+### Static training
+
+### Staircase procedure
+
+### EEG task
+
+```{r EEGTaskFigure, fig.cap = "(ref:EEGTaskFigs)"}
+include_graphics("Figures/NP3 images.png", auto_pdf = FALSE)
+```
+
+(ref:EEGTaskFigs) A) Example search display depicting a trial with four easy-coloured rings and four difficult-coloured rings. In this display the easy target is the horizontal rectangle on the left, and the difficult target is the vertical rectangle on the right. Participants must select one of the targets and indicate which side of the rectangle has a gap. Colours mark possible target locations and are associated with each difficulty (counterbalanced across participants). B) A simplified schematic of each condition. Eight coloured rings are presented in each display, but the ratio of easy- to difficult-coloured rings changes across trials. Each colour is restricted to one side of the display for a given trial, and this is counterbalanced across all trials (easy-coloured rings are on the left 50% of the time, and difficult-coloured rings are on the left 50% of the time). C) An example trial procedure. The initial fixation is on for between 500 and 1000ms (selected randomly on each trial), followed by the search display for 200ms, and a fixation which stays on until response (up to a maximum of 1500ms).
+
+Each trial began with a 500-1000ms fixation followed by a 200ms search display, and then a fixation display lasting until response (up to a maximum of 1500ms). The search display consisted of 16 rings, eight rings to the left of fixation and eight rings to the right of fixation. The rings on each side were arranged in two columns of four, and the layout of each column was curved to ensure that rings within a column were equidistant from fixation. In this way, stimuli can be thought of as falling along the imaginary line of either an inner or outer circle around fixation. Each ring contained a rounded rectangle with a gap in the centre of one of the long sides. One of these rectangles was oriented horizontally, one of these rectangles was oriented vertically, and the remaining 14 rectangles were tilted at a 45 degree angle. Participants were required to select either the vertical or horizontal rectangle, and indicate the edge that contained a gap. Responses were made on an ergodex key pad using keys arranged like the arrow keys of a standard computer keyboard. The two target locations were selected randomly on each trial with two restrictions. Firstly, that they were always presented on opposite sides of fixation, one left and one right, and secondly that they would always be the same distance from fixation ie. both targets would be presented on the inner circle of rings, or both on the outer circle. 
+
+Two factors were manipulated in order to affect participant performance. Firstly, the two targets differed with regard to the difficulty of the gap judgement. One rectangle contained a smaller gap size that was calibrated to be reportable on approximately 65% of trials, whereas the other rectangle contained a larger gap size that was calibrated to be reportable on approximately 90% of trials. 
+
+Secondly, possible target locations were highlighted by colouring a portion of the rings either red or blue. Locations of the coloured rings were randomly determined on each trial, with the restriction that each colour was constrained to one side of fixation (all red rings on one side, all blue rings on the other). In total, there were always eight coloured rings on screen, therefore, the ratio of red to blue rings varied across trials from 1:7 to 7:1 (with an even distribution of every possible ratio). For each participant, one of the colours highlighted the possible locations of the easy target, and the other colour highlighted the possible locations of the difficult target. As a result, the set size for a given difficulty varied as the proportion of red to blue rings varied. If red is associated with the easy judgement, then on trials with one red and 7 blue rings, participants could benefit from directing attention to the easy target immediately and responding. On the other hand, if there were seven red rings and only one blue, participants would have to decide whether to allocate their attention immediately to the difficult rectangle and attempt a judgment, or whether they would prefer to search through the seven red rings to find the easy rectangle and make their judgement.
+
+After each correct response, participants were give feedback indicating that they had gained a reward, one 'point', that would be converted to money at the end of the task. The task was run for 30 minutes (excluding breaks between blocks), and participants were therefore encouraged to perform as many accurate trials as possible within that 30 minutes in order to maximise their reward at the end of the task.
+
+## Stimuli
+
+```{r stimuliCalcs}
+ringsDCM = 2.4
+ringsTCM = 0.15
+rectLCM = 1.3
+rectWCM = 0.5
+rectTCM = 0.1
+fixationCM = 1
+distanceCM = 100
+
+ringsDAngle <- visAngle(ringsDCM, distanceCM)
+ringsTAngle <- visAngle(ringsTCM, distanceCM)
+rectLAngle <- visAngle(rectLCM, distanceCM)
+rectWAngle <- visAngle(rectWCM, distanceCM)
+rectTAngle <- visAngle(rectTCM, distanceCM)
+fixationAngle <- visAngle(fixationCM, distanceCM)
+```
+
+The 16 rings each had a diameter of `r printnum(ringsDAngle)`$^\circ$ of visual angle and a thickness of `r printnum(ringsTAngle)`$^\circ$. The rectangles were `r printnum(rectLAngle)`$^\circ$ x `r printnum(rectWAngle)`$^\circ$ with a thickness of `r printnum(rectTAngle)`$^\circ$. A fixation cross was maintained throughout the experiment (`r printnum(fixationAngle)`$^\circ$ x `r printnum(fixationAngle)`$^\circ$). The display background was a dark grey (RGB:60,60,60), while the fixation cross and non-coloured rings were all a light grey (RGB:158,158,158), and the rectangles were a medium grey (RGB:109,109,109). Coloured rings were either red (RGB:225,132,124) or blue (RGB:102,161,229). The ring colours (light grey, red, and blue) were balanced in terms of their physical luminance using a luminance meter (Konica Minolta LS-100).
+
 ## EEG recording
 
+EEG activity was recorded continuously at 1000Hz using Brain Products 64 channel actiCAP Ag/AgCl electodes. The electrodes were arranged according to the modified combinatorial nomenclature (MCN) for the 10-10 system. The online reference was FCz and the COM sensor was located on the z axis between FCz and Cz. EEG activity was preamplified by active electrodes and then passed to a brain products brainamp amplifier with 16 bit A/D conversion, an input impedance of 10MOhms, and an antialiasing filter with a 1000Hz low pass cut off. Impedances were kept below 25kOHms and active shielding was used throughout for attenuating common mode noise.
+
 ## EEG Processing
-
-## Statistical analysis
-
-# Results
-
-## Behavioural results
-```{r organiseBehavData}
-behavData <- read.table("Behaviour/BehavData.csv",header = TRUE, sep=",")
-
-#Remove lots of the default EPrime columns
-behavData <- select(behavData,-c(ExperimentName	,Session	,Clock.Information	,DataFile.Basename	,Display.RefreshRate	,ExperimentVersion	,PracAcc	,PracRT	,RandomSeed	,RuntimeCapabilities	,RuntimeVersion	,RuntimeVersionExpected	,SessionDate	,SessionStartDateTimeUtc	,SessionTime	,StudioVersion	,totalEuro	,totalPoints	,FiveDiffLeftFar	,FiveDiffLeftNear	,FiveDiffRightFar	,FiveDiffRightNear	,FiveEasyLeftFar	,FiveEasyLeftNear	,FiveEasyRightFar	,FiveEasyRightNear	,FourDiffLeftFar	,FourDiffLeftNear	,FourDiffRightFar	,FourDiffRightNear	,FourEasyLeftFar	,FourEasyLeftNear	,FourEasyRightFar	,FourEasyRightNear	,image1x	,image1y	,image2x	,image2y	,image3x	,image3y	,image4x	,image4y	,image5x	,image5y	,image6x	,image6y	,image7x	,image7y	,image8x	,image8y	,leftImage1	,leftImage2	,leftImage3	,leftImage4	,leftImage5	,leftImage6	,leftImage7	,leftImage8	,OneDiffLeftFar	,OneDiffLeftNear	,OneDiffRightFar	,OneDiffRightNear	,OneEasyLeftFar	,OneEasyLeftNear	,OneEasyRightFar	,OneEasyRightNear	,Response.ACC	,Response.CRESP	,Response.DurationError	,Response.OnsetDelay	,Response.OnsetTime	,Response.OnsetToOnsetTime	,Response.RESP	,Response.RT	,Response.RTTime	,Response1.ACC	,Response1.CRESP	,Response1.DurationError	,Response1.OnsetDelay	,Response1.OnsetTime	,Response1.OnsetToOnsetTime	,Response1.RESP	,Response1.RT	,Response1.RTTime	,rightImage1	,rightImage2	,rightImage3	,rightImage4	,rightImage5	,rightImage6	,rightImage7	,rightImage8	,Search.DurationError	,Search.OffsetTime	,Search.OnsetDelay	,Search.OnsetTime	,SevenDiffLeftFar	,SevenDiffLeftNear	,SevenDiffRightFar	,SevenDiffRightNear	,SevenEasyLeftFar	,SevenEasyLeftNear	,SevenEasyRightFar	,SevenEasyRightNear	,SixDiffLeftFar	,SixDiffLeftNear	,SixDiffRightFar	,SixDiffRightNear	,SixEasyLeftFar	,SixEasyLeftNear	,SixEasyRightFar	,SixEasyRightNear	,ThreeDiffLeftFar	,ThreeDiffLeftNear	,ThreeDiffRightFar	,ThreeDiffRightNear	,ThreeEasyLeftFar	,ThreeEasyLeftNear	,ThreeEasyRightFar	,ThreeEasyRightNear	,TwoDiffLeftFar	,TwoDiffLeftNear	,TwoDiffRightFar	,TwoDiffRightNear	,TwoEasyLeftFar	,TwoEasyLeftNear	,TwoEasyRightFar	,TwoEasyRightNear	)
-       )
-#Remove practice trials
-behavData <- filter(behavData, Running.Block. != "Practice")
-
-#Make subejct a factor
-behavData$Subject <- as.factor(behavData$Subject)
-
-#Reorder the relevant variable factors and make table
-behavData$collapseNFLR <- factor(behavData$collapseNFLR, levels = c("One", "Two", "Three", "Four", "Five", "Six", "Seven"))
-
-```
-
-(ref:indvSubjChoice) The proportion of trials where participants chose to respond to the easy target as a function of set size for the easy target. Greater than 50% would indicate a preference for the easy target in that condition, whereas less than 50% would indicate a preference for the difficult target in that condition.
-
-```{r plotIndvSubjChoice, fig.cap="(ref:indvSubjChoice)"}
-#Make group RT
-groupChoice <- behavData %>%
-  mutate(Subject = "Average") %>%
-  group_by(collapseNFLR,Subject) %>%
-  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
-  mutate(totalTrials = numEasy+numDiff) %>%
-  mutate(propEasy = numEasy/totalTrials)
-#Plot participant choices
-behavData %>%
-  group_by(collapseNFLR,Subject) %>%
-  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
-  mutate(totalTrials = numEasy+numDiff) %>%
-  mutate(propEasy = numEasy/totalTrials) %>%
-  ggplot(., aes(collapseNFLR,propEasy, colour = Subject, group = Subject)) +
-  #geom_rect(aes(xmin = 0, xmax = Inf, ymin = 0.5, ymax = 1), fill = "deepskyblue1", alpha = 0.2, colour = NA) +
-  #geom_rect(aes(xmin = 0, xmax = Inf, ymin = 0, ymax = .5), fill = "tomato1", colour = NA) +
-  geom_line(alpha = 0.5, size = 1) +
-  geom_point(data = groupChoice, size = 3.5, color = "black") + 
-  geom_line(data = groupChoice, size = 2.5, color = "black") +
-  geom_hline(yintercept = 0.5) +
-  scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(limits = c(0,1),name ="Proportion of easy target selections", breaks = seq(0, 1, .25)) +
-  guides(colour=FALSE, group = FALSE) +
-  theme_apa()+
-  theme(axis.line = element_line(color = "black", 
-                           size = 1, linetype = "solid"))
-stats <- behavData %>%
-  group_by(collapseNFLR,Subject) %>%
-  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
-  mutate(totalTrials = numEasy+numDiff) %>%
-  mutate(propEasy = numEasy/totalTrials)
-contrasts(stats$collapseNFLR) <- contr.poly(7)
-result <- lm(propEasy ~ 1 + collapseNFLR, data = stats)
-round(summary(result)$coefficients,3)
-```
-
-(ref:indvSubjAcc) Participant accuracy as a function of easy target set size.
-
-```{r plotIndvSubjAccuracy, fig.cap="(ref:indvSubjAcc)"}
-#Make group acc
-groupAcc <- behavData %>%
-  mutate(Subject = "Average", Search.ACC = Search.ACC*100) %>%
-  group_by(collapseNFLR,Subject) %>%
-  summarise(Accuracy = mean(Search.ACC))
-behavData %>%
-  mutate(Search.ACC = Search.ACC*100) %>%
-  group_by(collapseNFLR,Subject) %>%
-  summarise(Accuracy = mean(Search.ACC)) %>%
-  ggplot(., aes(collapseNFLR,Accuracy, colour = Subject, group = Subject)) +
-  geom_line(alpha = 0.5) + 
-  geom_point(data = groupAcc, size = 2.5, color = "black") +
-  geom_line(data = groupAcc, size = 1.5, color = "black") +
-  scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
-  guides(colour=FALSE, group = FALSE) +
-  theme_apa()
-stats <- behavData %>%
-  mutate(Search.ACC = Search.ACC*100) %>%
-  group_by(collapseNFLR,Subject) %>%
-  summarise(Accuracy = mean(Search.ACC))
-contrasts(stats$collapseNFLR) <- contr.poly(7)
-result <- lm(Accuracy ~ 1 + collapseNFLR, data = stats)
-round(summary(result)$coefficients,3)
-```
-
-(ref:indvSubjRT) Participants response time as a function of set size for the easy target.
-
-```{r plotIndvSubjRT, fig.cap="(ref:indvSubjRT)"}
-#Make group RT
-groupRT <- behavData %>%
-  filter(Search.ACC == 1) %>%
-  mutate(Subject = "Average") %>%
-  group_by(collapseNFLR,Subject) %>%
-  summarise(RT = mean(Search.RT)) %>%
-  mutate(RT= ifelse(RT==0,NA,RT))
-behavData %>%
-  filter(Search.ACC == 1) %>%
-  group_by(collapseNFLR,Subject) %>%
-  summarise(RT = mean(Search.RT)) %>%
-  mutate(RT= ifelse(RT==0,NA,RT)) %>%
-  ggplot(., aes(collapseNFLR,RT, colour = Subject, group = Subject)) +
-  geom_line(alpha = 0.5) +
-  geom_point(data = groupRT, size = 2.5, color = "black") +
-  geom_line(data = groupRT, size = 1.5, color = "black") +
-  scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(name ="Response time (ms)", limits = c(500,1000)) +
-  guides(colour=FALSE, group = FALSE) +
-  theme_apa()
-stats <- behavData %>%
-  filter(Search.ACC == 1) %>%
-  group_by(collapseNFLR,Subject) %>%
-  summarise(RT = mean(Search.RT)) %>%
-  mutate(RT= ifelse(RT==0,NA,RT))
-contrasts(stats$collapseNFLR) <- contr.poly(7)
-result <- lm(RT ~ 1 + collapseNFLR, data = stats)
-round(summary(result)$coefficients,3)
-```
-
-## ERP results
 
 ```{r organiseERPData}
 dPath = 'EEG/Visuals/'
@@ -276,13 +261,14 @@ allData <- cbind(origEpochInfo, scalpData)
 allData <- gather(allData, "sample", "voltage", gathercols, factor_key = TRUE)
 
 #Tidy variable names etc. and create any necessary variables - could use unite
+colnames(allData)[1:6] = c("StimTrig", "Event", "EasyField", "Distance", "EasySet", "Response")
 allData$sample <- as.integer(substring(allData$sample,2))
 allData <- allData %>% mutate(Hemisphere = ifelse(EasyField==Hem, "Ipsilateral", "Contralateral"))
 allData$SimpSet <- allData$EasySet
 allData$SimpSet <- recode(allData$SimpSet, "1" = "Small", "2" = "Small", "3" ="Medium", "4"="Medium", "5"="Medium", "6"="Large", "7"="Large")
 
 #clear stuff that I don't need
-rm(origEpochInfo,scalpData)
+rm(origEpochInfo,scalpData,epochInfo,lHemData,rHemData)
 ```
 
 ```{r setParams}
@@ -301,9 +287,15 @@ subjRej <- allData %>%
 for (i in unique(allData$Subject)) {
   allData$rej[allData$Subject == i] = subjRej$rej[subjRej$Subject==i]
 }
+eegExclusions = sum(subjRej$rej)
+eegRemain = length(subjRej$rej)-eegExclusions
+trialNmin = min(subjRej$trialCount)
+trialNmax = max(subjRej$trialCount)
+trialNmean = mean(subjRej$trialCount)
+trialNsd = sd(subjRej$trialCount)
 ```
 
-```{r grandAverageERP}
+```{r grandAverageERP, include = FALSE}
 allData %>%
   filter(Event == "Search" & rej == 0) %>%
   mutate(sample = sample*srateMultiplier-baseline) %>%
@@ -321,9 +313,8 @@ allData %>%
     theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
 ```
 
-### N2pc
-
-```{r N2pcStats}
+```{r calculateComponentWindows}
+#N2pc
 grandAverage <- allData %>%
   filter(Event == "Search" & rej == 0) %>%
   mutate(sample = sample*srateMultiplier-baseline) %>%
@@ -342,44 +333,8 @@ if (fixedWin) {
   postPeakData <- grandAverage[which(grandAverage$sample==peakTime)+1:nrow(grandAverage),]
   N2pcEnd <- postPeakData$sample[min(which(postPeakData$diff > peakValue*winBnd))]
 }
-N2pc.data <- allData %>%
-  mutate(sample = sample*2-baseline) %>%
-  filter(Event == "Search" & sample>N2pcStart & sample < N2pcEnd, rej == 0) %>%
-  group_by(EasySet,Hemisphere,Subject) %>%
-  summarise(mV = mean(voltage)) %>%
-  spread(Hemisphere,mV) %>%
-  mutate(diff = Contralateral - Ipsilateral)
-#plot values
-groupN2pc <- N2pc.data %>%
-  mutate(Subject = "Average") %>%
-  group_by(EasySet, Subject) %>%
-  summarise(diff = mean(diff))
-ggplot(N2pc.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject)) +
-  geom_line(alpha = 0.5, size = 1) +
-  geom_point(data = groupN2pc, size = 3.5, color = "black") + 
-  geom_line(data = groupN2pc, size = 2.5, color = "black") +
-  scale_x_discrete(name ="Easy set-size") +
-  scale_y_continuous(name ="N2pc Amplitude") +
-  guides(colour=FALSE, group = FALSE) +
-  theme_apa()+
-  theme(axis.line = element_line(color = "black", 
-                           size = 1, linetype = "solid"))
-N2pc.data %>%
-  group_by(EasySet) %>%
-  summarise(diff = mean(diff)) %>%
-  ggplot(., aes(x = EasySet, y = diff)) +
-  geom_point()
-ggplot(N2pc.data, aes(x = EasySet, y = diff)) +
-  geom_point()
-N2pc.data$EasySet <- as.factor(N2pc.data$EasySet)
-contrasts(N2pc.data$EasySet) <- contr.poly(7)
-result <- lm(diff ~ 1 + EasySet, data = N2pc.data)
-round(summary(result)$coefficients,3)
-```
 
-### P1pc
-
-```{r P1pcStats}
+#P1pc
 grandAverage <- allData %>%
   filter(Event == "Search" & rej == 0) %>%
   mutate(sample = sample*srateMultiplier-baseline) %>%
@@ -405,13 +360,282 @@ P1pc.data <- allData %>%
   summarise(mV = mean(voltage)) %>%
   spread(Hemisphere,mV) %>%
   mutate(diff = Contralateral - Ipsilateral)
+
+#SPCN
+SPCNStart = 300
+SPCNEnd = 600
+```
+
+EEG data were processed using the EEGLAB toolbox in MATLAB. First, data were downsampled to 500Hz, and filtered with a high-pass FIR filter (pop_eegfiltnew) with a passband of 0.1Hz. Automatic subspace reconstruction was used to clean raw data and to identify any bad channels (which were then reconstructed using spherical interpolation). 700ms segments were created around the onset of the search display (-200 to 500ms) excluding trials with an incorrect response, and baselined so that the average of the 200ms prestimulus period was zero. We then re-referenced the data to linked mastoids and applied a low-pass FIR filter with a passband of 35Hz. In order to identify eye movements a hEOG channel was created by taking the difference between the two channels located on the outer canthi of each eye, and a vEOG channel was created by taking the difference between electrodes placed above and below the right eye. Segments containing a horizontal eye-movement (±35$\mu$V in the hEOG) within the first 300ms post-stimulus, and vertical eye movements (±80$\mu$V in the vEOG) within the first 300ms were removed. We also removed any trial that contained activity greater than ±100$\mu$V in our electrodes of interest (PO3/4, PO7/8, P3/4, P5/6). Data were pooled by averaging left (PO3/PO7,P3,P5) and right (PO4,PO8,P4,P6) channel clusters and then recategorised as either contralateral or ipsilateral to the visual field containing the easy target. At this stage, if any participant had less than 600 trials remaining then they were removed from further analysis (resulting in `r printnum(eegExclusions, digits = 0)` exclusions). `r printnum(eegRemain, digits = 0)` people therefore remained in the final ERP analyses with trial numbers between `r printnum(trialNmin, digits = 0)` and `r printnum(trialNmax, digits = 0)` ($M$ = `r printnum(trialNmean)`, $SD$ = `r printnum(trialNsd)`). In order to select time windows for the ERP components of interest, a grand average lateralised ERP (contralateral - ipsilateral amplitude) was calculated for all participants and all conditions. The N2pc peak was defined as the peak negativity occurring between 180 and 350ms, and a 50ms window was selected around this peak time resulting in a window from `r printnum(N2pcStart, digits = 0)` to `r printnum(N2pcEnd, digits = 0)`. The P1pc peak was defined as the peak positivity occurring within the first 200ms, and a 50ms window was selected around this peak time resulting in a window from `r printnum(P1pcStart, digits = 0)` to `r printnum(P1pcEnd, digits = 0)`. Given the sustained nature of SPCN, a wider window was used, extending from 300ms post-stimulus until the end of the epoch.
+
+```{r summaryProcessing}
+#resampled to 500hz
+#highpass filter 0.1
+#channe rejection using clean_rawdata(FlatlineCriterion:def5, Highpass : def[0.25,0.75], ChannelCriterion : 0.8, LineNoiseCriterion:def4, BurstCriterion :def20, WindowCriterion :0.5)
+#interpolate removed electrodes
+#epoch correct trials -200 to 500ms
+#baseline 200ms
+#rereference to linked mastoids
+#lowpass filter 35
+#trial rejection
+#  pop_eegthresh(EEGtemp,1,[electrodes of interest] ,-100,100,epStart/1000,epEnd/1000,2,0);
+#  heog - pop_eegthresh(EEGtemp,1,f9Ind,-35,35,epStart/1000,0.3,2,0);
+#  veog - pop_eegthresh(EEGtemp,1,veogInd,-80,80,epStart/1000,0.3,2,0);
+#Left and right hemisphere clusters/pooling
+#  Left po3/po7/p3/p5
+#  right po4/po8/p4/p6
+```
+
+## Statistical analysis
+
+Throughout the results, the independent variable of interest was the ratio of easy to difficult coloured rings. This varied uniformly from 1:7 to 7:1 and therefore we expected any effects to be a linear effects of this ratio on our dependent measures. For each analysis, therefore, a linear contrast was used to test for the effect of easy to difficult ratio on the relevant measures. Dependent measures included target preference (the percentage of trials where participants selected the easy target), response time, accuracy, and lateralised ERP component amplitudes (N2pc, P1PC, and SPCN).
+
+# Results
+
+## Behavioural results
+```{r organiseBehavData}
+behavData <- read.table("Behaviour/BehavData.csv",header = TRUE, sep=",")
+
+#Remove lots of the default EPrime columns
+behavData <- select(behavData,-c(ExperimentName	,Session	,Clock.Information	,DataFile.Basename	,Display.RefreshRate	,ExperimentVersion	,PracAcc	,PracRT	,RandomSeed	,RuntimeCapabilities	,RuntimeVersion	,RuntimeVersionExpected	,SessionDate	,SessionStartDateTimeUtc	,SessionTime	,StudioVersion	,totalEuro	,totalPoints	,FiveDiffLeftFar	,FiveDiffLeftNear	,FiveDiffRightFar	,FiveDiffRightNear	,FiveEasyLeftFar	,FiveEasyLeftNear	,FiveEasyRightFar	,FiveEasyRightNear	,FourDiffLeftFar	,FourDiffLeftNear	,FourDiffRightFar	,FourDiffRightNear	,FourEasyLeftFar	,FourEasyLeftNear	,FourEasyRightFar	,FourEasyRightNear	,image1x	,image1y	,image2x	,image2y	,image3x	,image3y	,image4x	,image4y	,image5x	,image5y	,image6x	,image6y	,image7x	,image7y	,image8x	,image8y	,leftImage1	,leftImage2	,leftImage3	,leftImage4	,leftImage5	,leftImage6	,leftImage7	,leftImage8	,OneDiffLeftFar	,OneDiffLeftNear	,OneDiffRightFar	,OneDiffRightNear	,OneEasyLeftFar	,OneEasyLeftNear	,OneEasyRightFar	,OneEasyRightNear	,Response.ACC	,Response.CRESP	,Response.DurationError	,Response.OnsetDelay	,Response.OnsetTime	,Response.OnsetToOnsetTime	,Response.RESP	,Response.RT	,Response.RTTime	,Response1.ACC	,Response1.CRESP	,Response1.DurationError	,Response1.OnsetDelay	,Response1.OnsetTime	,Response1.OnsetToOnsetTime	,Response1.RESP	,Response1.RT	,Response1.RTTime	,rightImage1	,rightImage2	,rightImage3	,rightImage4	,rightImage5	,rightImage6	,rightImage7	,rightImage8	,Search.DurationError	,Search.OffsetTime	,Search.OnsetDelay	,Search.OnsetTime	,SevenDiffLeftFar	,SevenDiffLeftNear	,SevenDiffRightFar	,SevenDiffRightNear	,SevenEasyLeftFar	,SevenEasyLeftNear	,SevenEasyRightFar	,SevenEasyRightNear	,SixDiffLeftFar	,SixDiffLeftNear	,SixDiffRightFar	,SixDiffRightNear	,SixEasyLeftFar	,SixEasyLeftNear	,SixEasyRightFar	,SixEasyRightNear	,ThreeDiffLeftFar	,ThreeDiffLeftNear	,ThreeDiffRightFar	,ThreeDiffRightNear	,ThreeEasyLeftFar	,ThreeEasyLeftNear	,ThreeEasyRightFar	,ThreeEasyRightNear	,TwoDiffLeftFar	,TwoDiffLeftNear	,TwoDiffRightFar	,TwoDiffRightNear	,TwoEasyLeftFar	,TwoEasyLeftNear	,TwoEasyRightFar	,TwoEasyRightNear	)
+       )
+#Remove practice trials
+behavData <- filter(behavData, Running.Block. != "Practice")
+
+#Make subejct a factor
+behavData$Subject <- as.factor(behavData$Subject)
+
+#Reorder the relevant variable factors and make table
+behavData$collapseNFLR <- factor(behavData$collapseNFLR, levels = c("One", "Two", "Three", "Four", "Five", "Six", "Seven"))
+```
+
+```{r createExclusionCriteria, include=FALSE}
+for (sub in unique(behavData$Subject)) {
+  behavData$SD[behavData$Subject==sub] = sd(filter(behavData,Subject ==sub, Search.RT < 1500)$Search.RT)
+  behavData$Mean[behavData$Subject==sub] = mean(filter(behavData,Subject ==sub, Search.RT < 1500)$Search.RT)
+}
+behavData$Cutoff <- behavData$Mean + (behavData$SD * 2.5)
+
+#documenting trial rejection
+alltrials <- behavData %>%
+  group_by(Subject) %>%
+  count()
+survabrej <- behavData %>%
+  filter(Search.RT < Cutoff) %>%
+  group_by(Subject) %>%
+  count()
+survallrej <- behavData %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(Subject) %>%
+  count()
+alltrials = cbind(alltrials,two = survabrej$n,three = survallrej$n)
+alltrials %>%
+  mutate(twoPerc = (n-two)/n*100, threePerc = (two - three)/n*100) %>%
+  summarise(twomean = mean(twoPerc), threemean = mean(threePerc))
+```
+
+### Target choice
+
+(ref:indvSubjChoice) The proportion of trials where participants chose to respond to the easy target as a function of set size for the easy target. Greater than 50% would indicate a preference for the easy target in that condition, whereas less than 50% would indicate a preference for the difficult target in that condition.
+
+```{r plotIndvSubjChoice, fig.cap="(ref:indvSubjChoice)", include= FALSE}
+#Make group RT
+groupChoice <- behavData %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials)
+#Plot participant choices
+targChoicePlot <- behavData %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials) %>%
+  ggplot(., aes(collapseNFLR,propEasy, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5, size = 1) +
+  geom_point(data = groupChoice, size = 2.5, color = "black") + 
+  geom_line(data = groupChoice, size = 1.5, color = "black") +
+  geom_hline(yintercept = 0.5) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(limits = c(0,1),name ="Easy target preference (%)", breaks = seq(0, 1, .25)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+stats <- behavData %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials)
+contrasts(stats$collapseNFLR) <- contr.poly(7)
+result <- lm(propEasy ~ 1 + collapseNFLR, data = stats)
+round(summary(result)$coefficients,3)
+
+```
+
+Linear modelling showed a significant effect of set size on target choice where the likelihood of responding to the easy target decreased as the number of easy-coloured rings increased (and therefore the number of difficult-coloured rings decreased) (`r apa_print(result)$full_result$collapseNFLR_L`). 
+
+### Response times
+
+(ref:indvSubjRT) Participant response time as a function of easy target set size (the number of difficult-coloured rings is always 8-Easy-coloured rings).
+
+```{r plotIndvSubjRT, fig.cap="(ref:indvSubjRT)", include= FALSE}
+#Make group RT
+groupRT <- behavData %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  mutate(RT= ifelse(RT==0,NA,RT))
+accuracyPlot <- behavData %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  mutate(RT= ifelse(RT==0,NA,RT)) %>%
+  ggplot(., aes(collapseNFLR,RT, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5) +
+  geom_point(data = groupRT, size = 2.5, color = "black") +
+  geom_line(data = groupRT, size = 1.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Response time (ms)", limits = c(500,1000)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+stats <- behavData %>%
+  filter(Search.RT < Cutoff, Search.ACC == 1) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  mutate(RT= ifelse(RT==0,NA,RT))
+contrasts(stats$collapseNFLR) <- contr.poly(7)
+result <- lm(RT ~ 1 + collapseNFLR, data = stats)
+round(summary(result)$coefficients,3)
+```
+
+Linear modelling showed no significant effect of set size on response times (`r apa_print(result)$full_result$collapseNFLR_L`).
+
+```{r stzyvswitch, include=FALSE}
+behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch"), ChoseEasy = as.factor(ChoseEasy)) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1, Search.RT>200, !is.na(Search.RT)) %>%
+  group_by(collapseNFLR, transition, ChoseEasy) %>%
+  summarise(RT = mean(Search.RT)) %>%
+  ggplot(., aes(x=collapseNFLR, y=RT, group=interaction(transition,ChoseEasy), color=ChoseEasy)) +
+  geom_line(aes(linetype = transition)) +
+  theme_apa()
+
+
+```
+
+### Accuracy
+
+(ref:indvSubjAcc) Participant accuracy as a function of easy target set size (the number of difficult-coloured rings is always 8-Easy-coloured rings).
+
+```{r plotIndvSubjAccuracy, fig.cap="(ref:indvSubjAcc)", include= FALSE}
+#Make group acc
+groupAcc <- behavData %>%
+  filter(Search.RT < Cutoff) %>%
+  mutate(Subject = "Average", Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC))
+RTPlot <- behavData %>%
+  filter(Search.RT < Cutoff) %>%
+  mutate(Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC)) %>%
+  ggplot(., aes(collapseNFLR,Accuracy, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5) + 
+  geom_point(data = groupAcc, size = 2.5, color = "black") +
+  geom_line(data = groupAcc, size = 1.5, color = "black") +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(name ="Accuracy (%)", limits = c(50,100)) +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()
+stats <- behavData %>%
+  filter(Search.RT < Cutoff) %>%
+  mutate(Search.ACC = Search.ACC*100) %>%
+  group_by(collapseNFLR,Subject) %>%
+  summarise(Accuracy = mean(Search.ACC))
+contrasts(stats$collapseNFLR) <- contr.poly(7)
+result <- lm(Accuracy ~ 1 + collapseNFLR, data = stats)
+round(summary(result)$coefficients,3)
+
+layout <- "abc"
+targChoicePlot + accuracyPlot + RTPlot +
+  plot_layout(design = layout)
+ggsave("Figures/BehaviouralPlots.tiff", dpi=300, width=32, height = 8, units = "cm")
+```
+
+Linear modelling showed no significant effect of set size on response accuracy (`r apa_print(result)$full_result$collapseNFLR_L`).
+
+```{r behavfig, fig.cap = "(ref:behavPlot)"}
+include_graphics("Figures/BehaviouralPlots.tiff", auto_pdf = FALSE)
+```
+
+(ref:behavPlot) plots showing choice preference, accracy, and RT as a function of easy set size.
+
+## ERP results
+
+### N2pc
+
+```{r N2pcStats, include= FALSE}
+N2pc.data <- allData %>%
+  mutate(sample = sample*2-baseline) %>%
+  filter(Event == "Search" & sample>N2pcStart & sample < N2pcEnd, rej == 0) %>%
+  group_by(EasySet,Hemisphere,Subject) %>%
+  summarise(mV = mean(voltage)) %>%
+  spread(Hemisphere,mV) %>%
+  mutate(diff = Contralateral - Ipsilateral)
+#plot values
+groupN2pc <- N2pc.data %>%
+  mutate(Subject = "Average") %>%
+  group_by(EasySet, Subject) %>%
+  summarise(diff = mean(diff))
+n2pcPlot <- ggplot(N2pc.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject)) +
+  geom_line(alpha = 0.5, size = 1) +
+  scale_colour_gradient2(low = "#D2FAD2", mid = "#19E619", high = "#0A4B0A") +
+  geom_point(data = groupN2pc, size = 3.5, color = "black") + 
+  geom_line(data = groupN2pc, size = 2.5, color = "black") +
+  scale_x_discrete(name ="Easy set-size") +
+  scale_y_reverse( name ="N2pc Amplitude") +
+  guides(colour=FALSE, group = FALSE) +
+  theme_apa()+
+  theme(axis.line = element_line(color = "black", 
+                           size = 1, linetype = "solid"))
+ggsave("Figures/N2pcTrend.tiff", plot = n2pcPlot, dpi = 300, width = 16, height = 8, units = "cm")
+
+N2pc.data %>%
+  group_by(EasySet) %>%
+  summarise(diff = mean(diff)) %>%
+  ggplot(., aes(x = EasySet, y = diff)) +
+  geom_point()
+ggplot(N2pc.data, aes(x = EasySet, y = diff)) +
+  geom_point()
+N2pc.data$EasySet <- as.factor(N2pc.data$EasySet)
+contrasts(N2pc.data$EasySet) <- contr.poly(7)
+result <- lm(diff ~ 1 + EasySet, data = N2pc.data)
+round(summary(result)$coefficients,3)
+```
+
+```{r N2pcTrend, fig.cap = "(ref:N2pcTrendPlot)"}
+#include_graphics("Figures/N2pcTrend.tiff", auto_pdf = FALSE)
+```
+
+(ref:N2pcTrendPlot) N2pc amplitude as a function of easy set size. Individual data is shown in blue and the group average is shown in black.
+
+Linear modelling showed a significant effect of set size on N2pc amplitude where the likelihood of responding to the N2pc to the easy target's visual field decreased as the number of easy-coloured rings increased (`r apa_print(result)$full_result$EasySet_L`). 
+
+### P1pc
+
+```{r P1pcStats, include= FALSE}
 #plot values
 groupP1pc <- P1pc.data %>%
   mutate(Subject = "Average") %>%
   group_by(EasySet, Subject) %>%
   summarise(diff = mean(diff))
-ggplot(P1pc.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject)) +
+p1pcPlot <- ggplot(P1pc.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject)) +
   geom_line(alpha = 0.5, size = 1) +
+  scale_colour_gradient2(low = "#FAD2D2", mid = "#E61919", high = "#4B0A0A") +
   geom_point(data = groupP1pc, size = 3.5, color = "black") + 
   geom_line(data = groupP1pc, size = 2.5, color = "black") +
   scale_x_discrete(name ="Easy set-size") +
@@ -420,6 +644,8 @@ ggplot(P1pc.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject))
   theme_apa()+
   theme(axis.line = element_line(color = "black", 
                            size = 1, linetype = "solid"))
+ggsave("Figures/P1pcTrend.tiff", plot = p1pcPlot, dpi = 300, width = 16, height = 8, units = "cm")
+
 P1pc.data %>%
   group_by(EasySet) %>%
   summarise(diff = mean(diff)) %>%
@@ -433,12 +659,17 @@ result <- lm(diff ~ 1 + EasySet, data = P1pc.data)
 round(summary(result)$coefficients,3)
 ```
 
+```{r P1pcTrend, fig.cap = "(ref:p1pcTrendPlot)"}
+#include_graphics("Figures/P1pcTrend.tiff", auto_pdf = FALSE)
+```
+
+(ref:p1pcTrendPlot) P1pc amplitude as a function of easy set size. Individual data is shown in blue and the group average is shown in black.
+
+Linear modelling showed a significant effect of set size on N2pc amplitude where the likelihood of responding to the P1pc to the easy target's visual field increased as the number of easy-coloured rings increased (`r apa_print(result)$full_result$EasySet_L`). 
+
 ### SPCN
 
-```{r SPCNStats}
-SPCNStart = 300
-SPCNEnd = 600
-
+```{r SPCNStats, include= FALSE}
 SPCN.data <- allData %>%
   mutate(sample = sample*2-baseline) %>%
   filter(Event == "Search" & sample>SPCNStart & sample < SPCNEnd, rej == 0) %>%
@@ -451,16 +682,18 @@ groupSPCN <- SPCN.data %>%
   mutate(Subject = "Average") %>%
   group_by(EasySet, Subject) %>%
   summarise(diff = mean(diff))
-ggplot(SPCN.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject)) +
+SPCNPlot <- ggplot(SPCN.data, aes(x = EasySet, y = diff, colour = Subject, group = Subject)) +
   geom_line(alpha = 0.5, size = 1) +
   geom_point(data = groupSPCN, size = 3.5, color = "black") + 
   geom_line(data = groupSPCN, size = 2.5, color = "black") +
   scale_x_discrete(name ="Easy set-size") +
-  scale_y_continuous(name ="SPCN Amplitude") +
+  scale_y_reverse( name ="SPCN Amplitude") +
   guides(colour=FALSE, group = FALSE) +
   theme_apa()+
   theme(axis.line = element_line(color = "black", 
                            size = 1, linetype = "solid"))
+ggsave("Figures/SPCNTrend.tiff", plot = SPCNPlot, dpi = 300, width = 16, height = 8, units = "cm")
+
 SPCN.data %>%
   group_by(EasySet) %>%
   summarise(diff = mean(diff)) %>%
@@ -474,13 +707,18 @@ result <- lm(diff ~ 1 + EasySet, data = SPCN.data)
 round(summary(result)$coefficients,3)
 ```
 
-(ref:fullSetERPCap) Subtractracted ERPs showing the lateralized response contralateral to the side of the easy target as a function of easy set size. Component windows are highlighted.
+```{r SPCNTrend, fig.cap = "(ref:SPCNTrendPlot)"}
+#include_graphics("Figures/SPCNTrend.tiff", auto_pdf = FALSE)
+```
 
+(ref:SPCNTrendPlot) SPCN amplitude as a function of easy set size. Individual data is shown in blue and the group average is shown in black.
 
-```{r fullSetPlot, fig.cap="(ref:fullSetERPCap)"}
-my_palette <- brewer.pal(name="Blues",n=9)[3:9]
+Linear modelling showed a significant effect of set size on N2pc amplitude where the likelihood of responding to the P1pc to the easy target's visual field increased as the number of easy-coloured rings increased (`r apa_print(result)$full_result$EasySet_L`). 
+
+```{r fullSetPlot, include= FALSE}
+my_palette <- brewer.pal(name="Greys",n=9)[3:9]
 #Subtracted ERPs split by all set sizes
-allData %>%
+ERPPlot <- allData %>%
   filter(Event == "Search", rej == 0) %>%
   mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
   group_by(EasySet,sample,Hemisphere) %>%
@@ -488,9 +726,9 @@ allData %>%
   spread(Hemisphere, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>%
   ggplot(., aes(sample,diff)) +
-    geom_rect(xmin = P1pcStart, xmax = P1pcEnd, ymin = -Inf, ymax = 0, fill = "lemonchiffon") +
-    geom_rect(xmin = N2pcStart, xmax = N2pcEnd, ymin = Inf, ymax = 0, fill = "lemonchiffon") +
-    geom_rect(xmin = SPCNStart, xmax = SPCNEnd, ymin = Inf, ymax = 0, fill = "lemonchiffon") +
+    geom_rect(xmin = P1pcStart, xmax = P1pcEnd, ymin = -Inf, ymax = Inf, fill = "#FFE6E6", alpha = 0.3) +
+    geom_rect(xmin = N2pcStart, xmax = N2pcEnd, ymin = Inf, ymax = -Inf, fill = "#E6FFE6", alpha = 0.3) +
+    geom_rect(xmin = SPCNStart, xmax = SPCNEnd, ymin = Inf, ymax = -Inf, fill = "#E6E6FF", alpha = 0.3) +
     geom_line(aes(colour = EasySet),size=1) +
     scale_color_manual(values = my_palette) +
     scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
@@ -499,9 +737,119 @@ allData %>%
     geom_hline(yintercept = 0,linetype = "dashed") +
     theme_apa() +
     theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
+
+layout <- "
+aaa
+bcd
+"
+ERPPlot / (p1pcPlot | n2pcPlot | SPCNPlot) & 
+  theme(legend.position = "none")
+ggsave("Figures/ERPSPPT.tiff", dpi = 300, width = 27, height = 18, units = "cm")
 ```
 
+```{r includingERPfig, fig.cap="(ref:fullSetERPCap)"}
+include_graphics("Figures/ERPSPPT.tiff", auto_pdf = FALSE)
+```
+
+(ref:fullSetERPCap) Subtractracted ERPs showing the lateralized response contralateral to the side of the easy target as a function of easy set size. Component windows are highlighted.
+
+## Extra analyses
+
+```{r playng, include=FALSE}
+speedSplitPlot <- allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(RT,2), ExpHalf = ntile(BlockN,2), RTSpeed = ifelse(RTSpeed==1,"Fast","Slow"), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  group_by(SimpSet,sample,Hemisphere,RTSpeed) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_rect(xmin = P1pcStart, xmax = P1pcEnd, ymin = -Inf, ymax = Inf, fill = "#FFE6E6", alpha = 0.3) +
+    geom_rect(xmin = N2pcStart, xmax = N2pcEnd, ymin = Inf, ymax = -Inf, fill = "#E6FFE6", alpha = 0.3) +
+    geom_rect(xmin = SPCNStart, xmax = SPCNEnd, ymin = Inf, ymax = -Inf, fill = "#E6E6FF", alpha = 0.3) +
+    geom_line(aes(colour = SimpSet),size=1) +
+    scale_color_manual(values = my_palette) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    facet_grid(.~RTSpeed) +
+    theme_apa() +
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
+
+blockSplitPlot <- allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(RT,2), ExpHalf = ntile(BlockN,2), RTSpeed = ifelse(RTSpeed==1,"Fast","Slow"), ExpHalf = ifelse(ExpHalf==1,"First Half","Second Half")) %>%
+  group_by(SimpSet,sample,Hemisphere,ExpHalf) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_rect(xmin = P1pcStart, xmax = P1pcEnd, ymin = -Inf, ymax = Inf, fill = "#FFE6E6", alpha = 0.3) +
+    geom_rect(xmin = N2pcStart, xmax = N2pcEnd, ymin = Inf, ymax = -Inf, fill = "#E6FFE6", alpha = 0.3) +
+    geom_rect(xmin = SPCNStart, xmax = SPCNEnd, ymin = Inf, ymax = -Inf, fill = "#E6E6FF", alpha = 0.3) +
+    geom_line(aes(colour = SimpSet),size=1) +
+    scale_color_manual(values = my_palette) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    facet_grid(.~ExpHalf) +
+    theme_apa() +
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
+
+layout <- "
+a
+b
+"
+speedSplitPlot / blockSplitPlot + 
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "bottom")
+ggsave("Figures/ERPSplit.tiff", dpi = 300, width = 27, height = 18, units = "cm")
+
+allData$deciles = ntile(allData$TrialN,2)
+hmData <- allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
+  group_by(Subject) %>%
+  mutate(deciles = ntile(RT,5), ExpHalf = ntile(BlockN,2)) %>%
+  group_by(SimpSet,sample,Hemisphere,deciles) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral)
+ggplot() +
+  geom_tile(data = hmData, aes(sample,deciles,fill = diff)) +
+  scale_fill_gradient2(low = "blue", mid ="white", high = "red")
+ggplot() +
+  geom_line(data = hmData, aes(x=sample,y = diff, colour = SimpSet)) +
+  facet_grid(.~deciles)
+```
+
+```{r includingERPsplitfig, fig.cap="(ref:fullSetERPsplitCap)"}
+include_graphics("Figures/ERPSplit.tiff", auto_pdf = FALSE)
+```
+
+(ref:fullSetERPsplitCap) Some additional analyses that may be useful (stats not run yet). I've collapsed across some set sizes in order to keep signal to noise high, and then split by median RT (top row), and experiment half (bottom row).
+
 # Discussion
+
+N2pc function and interpretations.
+
+P1pc function and interpretations.
+
+SPCN function and interpretations.
+
+Similarities of task to voluntry task switching, bivalent stimuli/displays.
+
+of note:
+dissociation of n2pc and spcn. in the 4:4 condition we see normal results - no p1pc, an n2pc followed by spcn. In the 1:7-3:5 conditions, we see surprise - inverse p1pc followed by n2pc followed by inverse/absent spcn. In the 5:3-7:1 conditions we also see surprise - p1pc followed by no (not much) N2pc followed by SPCN.
+
+limitations
+People can attend to just vertical and horizontal rather than colours.
 
 \newpage
 
