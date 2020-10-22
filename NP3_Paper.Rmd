@@ -407,6 +407,8 @@ behavData$Subject <- as.factor(behavData$Subject)
 
 #Reorder the relevant variable factors and make table
 behavData$collapseNFLR <- factor(behavData$collapseNFLR, levels = c("One", "Two", "Three", "Four", "Five", "Six", "Seven"))
+
+my_palette <- brewer.pal(name="Greys",n=9)[3:9]
 ```
 
 ```{r createExclusionCriteria, include=FALSE}
@@ -472,7 +474,6 @@ stats <- behavData %>%
 contrasts(stats$collapseNFLR) <- contr.poly(7)
 result <- lm(propEasy ~ 1 + collapseNFLR, data = stats)
 round(summary(result)$coefficients,3)
-
 ```
 
 Linear modelling showed a significant effect of set size on target choice where the likelihood of responding to the easy target decreased as the number of easy-coloured rings increased (and therefore the number of difficult-coloured rings decreased) (`r apa_print(result)$full_result$collapseNFLR_L`). 
@@ -563,7 +564,7 @@ round(summary(result)$coefficients,3)
 layout <- "abc"
 targChoicePlot + accuracyPlot + RTPlot +
   plot_layout(design = layout)
-ggsave("Figures/BehaviouralPlots.tiff", dpi=300, width=32, height = 8, units = "cm")
+ggsave("Figures/BehaviouralPlots.tiff", dpi=100, width=32, height = 8, units = "cm")
 ```
 
 Linear modelling showed no significant effect of set size on response accuracy (`r apa_print(result)$full_result$collapseNFLR_L`).
@@ -602,7 +603,7 @@ n2pcPlot <- ggplot(N2pc.data, aes(x = EasySet, y = diff, colour = Subject, group
   theme_apa()+
   theme(axis.line = element_line(color = "black", 
                            size = 1, linetype = "solid"))
-ggsave("Figures/N2pcTrend.tiff", plot = n2pcPlot, dpi = 300, width = 16, height = 8, units = "cm")
+ggsave("Figures/N2pcTrend.tiff", plot = n2pcPlot, dpi = 100, width = 16, height = 8, units = "cm")
 
 N2pc.data %>%
   group_by(EasySet) %>%
@@ -644,7 +645,7 @@ p1pcPlot <- ggplot(P1pc.data, aes(x = EasySet, y = diff, colour = Subject, group
   theme_apa()+
   theme(axis.line = element_line(color = "black", 
                            size = 1, linetype = "solid"))
-ggsave("Figures/P1pcTrend.tiff", plot = p1pcPlot, dpi = 300, width = 16, height = 8, units = "cm")
+ggsave("Figures/P1pcTrend.tiff", plot = p1pcPlot, dpi = 100, width = 16, height = 8, units = "cm")
 
 P1pc.data %>%
   group_by(EasySet) %>%
@@ -692,7 +693,7 @@ SPCNPlot <- ggplot(SPCN.data, aes(x = EasySet, y = diff, colour = Subject, group
   theme_apa()+
   theme(axis.line = element_line(color = "black", 
                            size = 1, linetype = "solid"))
-ggsave("Figures/SPCNTrend.tiff", plot = SPCNPlot, dpi = 300, width = 16, height = 8, units = "cm")
+ggsave("Figures/SPCNTrend.tiff", plot = SPCNPlot, dpi = 100, width = 16, height = 8, units = "cm")
 
 SPCN.data %>%
   group_by(EasySet) %>%
@@ -716,7 +717,6 @@ round(summary(result)$coefficients,3)
 Linear modelling showed a significant effect of set size on N2pc amplitude where the likelihood of responding to the P1pc to the easy target's visual field increased as the number of easy-coloured rings increased (`r apa_print(result)$full_result$EasySet_L`). 
 
 ```{r fullSetPlot, include= FALSE}
-my_palette <- brewer.pal(name="Greys",n=9)[3:9]
 #Subtracted ERPs split by all set sizes
 ERPPlot <- allData %>%
   filter(Event == "Search", rej == 0) %>%
@@ -744,7 +744,7 @@ bcd
 "
 ERPPlot / (p1pcPlot | n2pcPlot | SPCNPlot) & 
   theme(legend.position = "none")
-ggsave("Figures/ERPSPPT.tiff", dpi = 300, width = 27, height = 18, units = "cm")
+ggsave("Figures/ERPSPPT.tiff", dpi = 100, width = 27, height = 18, units = "cm")
 ```
 
 ```{r includingERPfig, fig.cap="(ref:fullSetERPCap)"}
@@ -809,7 +809,7 @@ b
 speedSplitPlot / blockSplitPlot + 
   plot_layout(guides = "collect") & 
   theme(legend.position = "bottom")
-ggsave("Figures/ERPSplit.tiff", dpi = 300, width = 27, height = 18, units = "cm")
+ggsave("Figures/ERPSplit.tiff", dpi = 100, width = 27, height = 18, units = "cm")
 
 allData$deciles = ntile(allData$TrialN,2)
 hmData <- allData %>%
@@ -835,6 +835,225 @@ include_graphics("Figures/ERPSplit.tiff", auto_pdf = FALSE)
 
 (ref:fullSetERPsplitCap) Some additional analyses that may be useful (stats not run yet). I've collapsed across some set sizes in order to keep signal to noise high, and then split by median RT (top row), and experiment half (bottom row).
 
+```{r test}
+behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
+  #filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(Search.RT,4),RTSpeed = as.factor(RTSpeed)) %>%
+  ungroup() %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject, RTSpeed) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials) %>%
+  ggplot(.,aes(collapseNFLR,propEasy, colour = RTSpeed, group = RTSpeed)) +
+  geom_smooth(se=FALSE)
+  geom_point()  
+  geom_line()
+test <- behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(Search.RT,4)) %>%
+  group_by(collapseNFLR,Subject, RTSpeed) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+    ungroup()%>%
+  mutate(propEasy = numEasy/totalTrials,collapseNFLR=as.integer(collapseNFLR))
+teststat <- lm(propEasy ~ RTSpeed * collapseNFLR, data=test)
+
+behavData %>%
+  filter(Search.RT < Cutoff) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(Search.RT,4),RTSpeed = as.factor(RTSpeed)) %>%
+  ungroup() %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject, RTSpeed) %>%
+  summarise(acc = mean(Search.ACC)) %>%
+  ggplot(.,aes(collapseNFLR,acc, colour = RTSpeed, group = RTSpeed)) +
+  geom_smooth(se=FALSE)
+  geom_point()  
+  geom_line()
+test <- behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(Search.RT,4)) %>%
+  group_by(collapseNFLR,Subject, RTSpeed) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+    ungroup()%>%
+  mutate(propEasy = numEasy/totalTrials,collapseNFLR=as.integer(collapseNFLR))
+teststat <- lm(propEasy ~ RTSpeed * collapseNFLR, data=test)
+
+behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
+  filter(Search.RT < Cutoff) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(Search.RT,2), RTSpeed = ifelse(RTSpeed==1,"Fast","Slow")) %>%
+  ungroup() %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject, Search.ACC) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials, Search.ACC = as.factor(Search.ACC)) %>%
+  ggplot(.,aes(collapseNFLR,propEasy, colour = Search.ACC, group = Search.ACC)) +
+  geom_point() + 
+  geom_line()
+
+behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
+  filter(Search.RT < Cutoff) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(Search.RT,2), RTSpeed = ifelse(RTSpeed==1,"Fast","Slow")) %>%
+  ungroup() %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject, transition) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials) %>%
+  ggplot(.,aes(collapseNFLR,propEasy, colour = transition, group = transition)) +
+  geom_point() + 
+  geom_line()
+
+
+behavData %>%
+  group_by(Subject) %>%
+  mutate(cumEasyC = cumsum(ChoseEasy), cumDiffC = cumsum(ChoseDiff)) %>%
+  #filter(Subject==2) %>%
+  mutate(Block = Block-min(Block)+1, Trial = Trial+(Block*56)-56) %>%
+  ggplot(., aes(x=Trial)) +
+  geom_abline(intercept = 0, slope = 1) +
+  geom_abline(intercept = 0, slope = 0.5) +
+  geom_abline(intercept = 0, slope = 0) +
+  geom_line(aes( y=cumEasyC, colour = "easy"), size = 1) +
+  geom_line(aes(y=cumDiffC, colour ="diff"), size = 1) +
+  coord_fixed(ratio = 1, xlim = NULL, ylim = NULL, expand = TRUE, clip = "on") +
+  facet_wrap(~Subject) +
+  theme_apa()
+
+plotData <- behavData %>%
+  group_by(Subject) %>%
+  mutate(Block = Block-min(Block)+1) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(collapseNFLR,Subject,Block) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials)
+ggplot(plotData, aes(Block,propEasy, colour = collapseNFLR, group = collapseNFLR)) +
+  geom_point(alpha = 0.5, size = 1) +
+  scale_color_manual(values = my_palette) +
+  geom_line(data=plotData %>% group_by(Block,Subject) %>% mutate(propEasy=mean(propEasy)), aes(Block,propEasy), color = "black", size = 1.5) +
+  geom_hline(yintercept = 0.5) +
+  scale_x_discrete(name ="Number of easy-coloured objects") +
+  scale_y_continuous(limits = c(0,1),name ="Easy target preference (%)", breaks = seq(0, 1, .25)) +
+  guides(colour=FALSE, group = FALSE) +
+  facet_wrap(~Subject) +
+  theme_apa()
+
+
+behavData %>%
+  group_by(Subject,collapseNFLR) %>%
+  mutate(ProbEasy = mean(ChoseEasy)) %>%
+  group_by(Subject, ChoseEasy,collapseNFLR) %>%
+  summarise(ProbReward = mean(Search.ACC), ProbEasy = mean(ProbEasy)) %>%
+  ungroup() %>%
+  mutate(probChoice = ifelse(ChoseEasy==0,1-ProbEasy,ProbEasy), ChoseEasy = as.factor(ChoseEasy) ) %>%
+  ggplot(., aes(probChoice,ProbReward, group=collapseNFLR)) +
+  geom_point(aes(shape = ChoseEasy)) +
+  geom_line(aes(probChoice,ProbReward, colour = collapseNFLR))+
+  facet_wrap(~Subject) +
+  theme_apa()
+behavData %>%
+  group_by(Subject,collapseNFLR) %>%
+  mutate(ProbEasy = mean(ChoseEasy),Block = Block-min(Block)+1) %>%
+  group_by(ChoseEasy,collapseNFLR,Block) %>%
+  summarise(ProbReward = mean(Search.ACC), ProbEasy = mean(ProbEasy)) %>%
+  ungroup() %>%
+  mutate(probChoice = ifelse(ChoseEasy==0,1-ProbEasy,ProbEasy), ChoseEasy = as.factor(ChoseEasy) ) %>%
+  ggplot(., aes(probChoice,ProbReward, group=collapseNFLR)) +
+  geom_point(aes(shape = ChoseEasy)) +
+  geom_line(aes(probChoice,ProbReward, colour = collapseNFLR))+
+  facet_wrap(~Block) +
+  theme_apa()
+
+behavData %>%
+  group_by(Subject) %>%
+  mutate(Block = Block-min(Block)+1, ChoseEasy=as.factor(ChoseEasy)) %>%
+  filter(Block<21) %>%
+  group_by(ChoseEasy,collapseNFLR,Block) %>%
+  summarise(acc = mean(Search.ACC)) %>%
+  ggplot(., aes(Block,acc,group=interaction(ChoseEasy,collapseNFLR),colour = collapseNFLR)) +
+  geom_smooth(aes(linetype=ChoseEasy),se=FALSE)+
+  theme_apa()
+
+behavData %>%
+  group_by(Subject) %>%
+  mutate(ChoseEasy=as.factor(ChoseEasy)) %>%
+  group_by(ChoseEasy,Subject) %>%
+  ggplot(., aes(Search.RT,colour=ChoseEasy,fill=ChoseEasy)) +
+  geom_histogram(position="dodge") +
+  facet_wrap(~Subject) +  
+  theme_apa()
+behavData %>%
+  group_by(Subject) %>%
+  mutate(ChoseEasy=as.factor(ChoseEasy)) %>%
+  group_by(ChoseEasy,Subject) %>%
+  ggplot(., aes(Search.RT,colour=ChoseEasy,fill=ChoseEasy)) +
+  geom_density(alpha=0.3) +
+  facet_wrap(~Subject) +  
+  theme_apa()
+
+reg <- behavData %>%
+  filter(Subject != 16, Subject != 24) %>%
+  group_by(Subject) %>%
+  mutate(nplus1 = lag(ChoseEasy), easySet = lag(as.integer(collapseNFLR)), Search.ACC = lag(Search.ACC)) %>%
+  filter(Search.ACC==1) %>%
+  mutate(RTSpeed = Search.RT) %>% #lag(ntile(Search.RT,4))
+  ungroup() %>%
+  mutate(Subject = as.factor(Subject)) %>%
+  select(c(nplus1,ChoseEasy,easySet,RTSpeed,Subject))
+reg <- na.omit(reg)
+regModSub <- glm(nplus1 ~ Subject,
+                  data=reg,
+                  family = binomial(link="logit"),
+                  na.action(na.omit)
+                  )
+regMod <- glm(nplus1 ~ easySet * ChoseEasy * RTSpeed + (1|Subject),
+                  data=reg,
+                  family = binomial(link="logit"),
+                  na.action(na.omit)
+                  )
+regMod <- glmer(nplus1 ~ easySet * ChoseEasy * RTSpeed + (1|Subject),
+                  data=reg,
+                  family = binomial)
+anova(regMod,
+      regModSub,
+      test="Chisq")
+summary(regMod)
+
+reg$predy <- predict(regMod, type="response")  
+plot(nplus1 ~ predy,
+     data = reg,
+     pch = 16,
+     xlab="Predicted probability of 1 response",
+     ylab="Actual response")
+
+reg %>%
+  group_by(nplus1) %>%
+  summarise(prediction = mean(predy))
+
+reg <- reg %>% arrange(easySet)
+reg <- reg %>% arrange(RTSpeed)
+reg <- reg %>% arrange(ChoseEasy)
+reg <- reg %>% arrange(nplus1)
+reg$trial <- as.numeric(row.names(reg))
+ggplot(reg) +
+  geom_line(aes(x=trial,y=predy), colour = "red", alpha=0.3) +
+  geom_line(aes(x=trial,y=nplus1), colour = "blue", alpha = 0.3)
+```
+
 # Discussion
 
 N2pc function and interpretations.
@@ -846,7 +1065,7 @@ SPCN function and interpretations.
 Similarities of task to voluntry task switching, bivalent stimuli/displays.
 
 of note:
-dissociation of n2pc and spcn. in the 4:4 condition we see normal results - no p1pc, an n2pc followed by spcn. In the 1:7-3:5 conditions, we see surprise - inverse p1pc followed by n2pc followed by inverse/absent spcn. In the 5:3-7:1 conditions we also see surprise - p1pc followed by no (not much) N2pc followed by SPCN.
+dissociation of n2pc and spcn. in the 4:4 condition we see normal results - no p1pc, an n2pc followed by spcn. In the small easy set conditions, we see surprise - inverse p1pc followed by n2pc followed by inverse/absent spcn. In the large easy set conditions we also see surprise - p1pc followed by no (not much) N2pc followed by SPCN.
 
 limitations
 People can attend to just vertical and horizontal rather than colours.
