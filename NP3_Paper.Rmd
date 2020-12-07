@@ -160,7 +160,7 @@ summary <- demoData %>% filter(EEG == 1) %>%
   summarise(N = n(), numF = sum(Sex), meanAge = mean(Age), minAge = min(Age), maxAge = max(Age), sdAge = sd(Age))
 ```
 
-In total, `r printnum(length(demoData$Subj))` participants were recruited to participate in the experiment, however `r printnum(length(demoData$EEG[demoData$EEG==0]))` participants could not perform the task accurately in the first session and therefore they were not invited back for the EEG session and there data was not used. Of the `r printnum(summary$N)` particpants who completed both sessions, `r printnum(summary$numF, digits = 0)` were female, and all were right-handed. Ages ranged from `r printnum(summary$minAge)` to `r printnum(summary$maxAge)`, and the mean age was `r printnum(summary$meanAge)` (SD = `r printnum(summary$sdAge)`).
+In total, `r printnum(length(demoData$Subj))` participants were recruited to participate in the experiment, however `r printnum(length(demoData$EEG[demoData$EEG==0]))` participants could not perform the task accurately in the first session and therefore they were not invited back for the EEG session and theie data was not used. Of the `r printnum(summary$N)` particpants who completed both sessions, `r printnum(summary$numF, digits = 0)` were female, and all were right-handed. Ages ranged from `r printnum(summary$minAge)` to `r printnum(summary$maxAge)`, and the mean age was `r printnum(summary$meanAge)` (SD = `r printnum(summary$sdAge)`).
 
 ## Experimental procedure
 
@@ -436,33 +436,33 @@ alltrials %>%
   summarise(twomean = mean(twoPerc), threemean = mean(threePerc))
 ```
 
-### Target choice
+### Set size effect
 
 (ref:indvSubjChoice) The proportion of trials where participants chose to respond to the easy target as a function of set size for the easy target. Greater than 50% would indicate a preference for the easy target in that condition, whereas less than 50% would indicate a preference for the difficult target in that condition.
 
 ```{r plotIndvSubjChoice, fig.cap="(ref:indvSubjChoice)", include= FALSE}
-#Make group RT
+#Make group choice
 groupChoice <- behavData %>%
   filter(Search.RT < Cutoff, Search.ACC==1) %>%
   mutate(Subject = "Average") %>%
   group_by(collapseNFLR,Subject) %>%
   summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
   mutate(totalTrials = numEasy+numDiff) %>%
-  mutate(propEasy = numEasy/totalTrials)
+  mutate(propEasy = numEasy/totalTrials*100)
 #Plot participant choices
 targChoicePlot <- behavData %>%
   filter(Search.RT < Cutoff, Search.ACC==1) %>%
   group_by(collapseNFLR,Subject) %>%
   summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
   mutate(totalTrials = numEasy+numDiff) %>%
-  mutate(propEasy = numEasy/totalTrials) %>%
+  mutate(propEasy = numEasy/totalTrials*100) %>%
   ggplot(., aes(collapseNFLR,propEasy, colour = Subject, group = Subject)) +
   geom_line(alpha = 0.5, size = 1) +
   geom_point(data = groupChoice, size = 2.5, color = "black") + 
   geom_line(data = groupChoice, size = 1.5, color = "black") +
-  geom_hline(yintercept = 0.5) +
+  geom_hline(yintercept = 50) +
   scale_x_discrete(name ="Number of easy-coloured objects") +
-  scale_y_continuous(limits = c(0,1),name ="Easy target preference (%)", breaks = seq(0, 1, .25)) +
+  scale_y_continuous(limits = c(0,100),name ="Easy target preference (%)", breaks = seq(0, 100, 25)) +
   guides(colour=FALSE, group = FALSE) +
   theme_apa()
 stats <- behavData %>%
@@ -472,17 +472,8 @@ stats <- behavData %>%
   mutate(totalTrials = numEasy+numDiff) %>%
   mutate(propEasy = numEasy/totalTrials)
 contrasts(stats$collapseNFLR) <- contr.poly(7)
-result <- lm(propEasy ~ 1 + collapseNFLR, data = stats)
-round(summary(result)$coefficients,3)
-```
+choiceresult <- lm(propEasy ~ 1 + collapseNFLR, data = stats)
 
-Linear modelling showed a significant effect of set size on target choice where the likelihood of responding to the easy target decreased as the number of easy-coloured rings increased (and therefore the number of difficult-coloured rings decreased) (`r apa_print(result)$full_result$collapseNFLR_L`). 
-
-### Response times
-
-(ref:indvSubjRT) Participant response time as a function of easy target set size (the number of difficult-coloured rings is always 8-Easy-coloured rings).
-
-```{r plotIndvSubjRT, fig.cap="(ref:indvSubjRT)", include= FALSE}
 #Make group RT
 groupRT <- behavData %>%
   filter(Search.RT < Cutoff, Search.ACC==1) %>%
@@ -509,30 +500,8 @@ stats <- behavData %>%
   summarise(RT = mean(Search.RT)) %>%
   mutate(RT= ifelse(RT==0,NA,RT))
 contrasts(stats$collapseNFLR) <- contr.poly(7)
-result <- lm(RT ~ 1 + collapseNFLR, data = stats)
-round(summary(result)$coefficients,3)
-```
+rtresult <- lm(RT ~ 1 + collapseNFLR, data = stats)
 
-Linear modelling showed no significant effect of set size on response times (`r apa_print(result)$full_result$collapseNFLR_L`).
-
-```{r stzyvswitch, include=FALSE}
-behavData %>%
-  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch"), ChoseEasy = as.factor(ChoseEasy)) %>%
-  filter(Search.RT < Cutoff, Search.ACC==1, Search.RT>200, !is.na(Search.RT)) %>%
-  group_by(collapseNFLR, transition, ChoseEasy) %>%
-  summarise(RT = mean(Search.RT)) %>%
-  ggplot(., aes(x=collapseNFLR, y=RT, group=interaction(transition,ChoseEasy), color=ChoseEasy)) +
-  geom_line(aes(linetype = transition)) +
-  theme_apa()
-
-
-```
-
-### Accuracy
-
-(ref:indvSubjAcc) Participant accuracy as a function of easy target set size (the number of difficult-coloured rings is always 8-Easy-coloured rings).
-
-```{r plotIndvSubjAccuracy, fig.cap="(ref:indvSubjAcc)", include= FALSE}
 #Make group acc
 groupAcc <- behavData %>%
   filter(Search.RT < Cutoff) %>%
@@ -558,8 +527,7 @@ stats <- behavData %>%
   group_by(collapseNFLR,Subject) %>%
   summarise(Accuracy = mean(Search.ACC))
 contrasts(stats$collapseNFLR) <- contr.poly(7)
-result <- lm(Accuracy ~ 1 + collapseNFLR, data = stats)
-round(summary(result)$coefficients,3)
+accresult <- lm(Accuracy ~ 1 + collapseNFLR, data = stats)
 
 layout <- "abc"
 targChoicePlot + accuracyPlot + RTPlot +
@@ -567,13 +535,143 @@ targChoicePlot + accuracyPlot + RTPlot +
 ggsave("Figures/BehaviouralPlots.tiff", dpi=100, width=32, height = 8, units = "cm")
 ```
 
-Linear modelling showed no significant effect of set size on response accuracy (`r apa_print(result)$full_result$collapseNFLR_L`).
+Linear modelling showed a significant effect of set size on target choice where easy target preference (the likelihood of responding to the easy target) decreased as the number of easy-coloured rings increased (`r apa_print(choiceresult)$full_result$collapseNFLR_L`). We did not see any effect of set size on response times (`r apa_print(rtresult)$full_result$collapseNFLR_L`), nor any effect of set size on accuracy (`r apa_print(accresult)$full_result$collapseNFLR_L`).
 
 ```{r behavfig, fig.cap = "(ref:behavPlot)"}
 include_graphics("Figures/BehaviouralPlots.tiff", auto_pdf = FALSE)
 ```
 
 (ref:behavPlot) plots showing choice preference, accracy, and RT as a function of easy set size.
+
+### Choice behaviour
+
+```{r choiceBehaviour}
+choicePercent <- behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(Subject) %>%
+  mutate(Block = Block - min(Block)) %>%
+  group_by(Subject, Block) %>%
+  summarise(percentEasy = mean(ChoseEasy)*100) %>%
+  ggplot(aes(x=Block, y=percentEasy, group = Subject)) +
+  geom_smooth(se = FALSE, alpha = 0.3, size=.5) +
+  #geom_line() +
+  #scale_colour_manual(values=c("green4", "gray42")) +
+  labs(y = "Chose easy (%)") +
+  lims(y=c(0,100)) +
+  ggtitle("A") +
+  theme(#legend.position = "None"#,
+        #axis.title.x = element_blank())
+    legend.position = c(0, 1), 
+       legend.justification = c(0, 1),
+    legend.text=element_text(size=8),
+    legend.title=element_blank(),
+    plot.title = element_text(hjust = 0)
+  )
+
+choiceRTAvg <- behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch"), choice = ifelse(ChoseEasy==1, "Easy", "Diff")) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(choice, transition) %>%
+  summarise(mean = mean(Search.RT))
+choiceRTPlot <- behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch"), choice = ifelse(ChoseEasy==1, "Easy", "Diff")) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(Subject,choice, transition) %>%
+  summarise(mean = mean(Search.RT)) %>%
+  ggplot(aes(x = transition, y = mean)) +
+  geom_point(aes(colour = choice), size = 2, alpha = 0.3) +
+  geom_line(aes(colour = choice, group = Subject), alpha = 0.3) +
+  geom_point(data = choiceRTAvg, aes(colour = choice),size = 5) +
+  geom_line(data = choiceRTAvg, aes(group = choice, colour = choice), size=2) +
+  ggtitle("B") +
+  facet_grid(.~choice) +
+  scale_colour_manual(values=c("green4", "gray42")) +
+  #scale_y_continuous(name = "Task choice time (ms)",limits = c(0,500)) +
+  scale_x_discrete(limits=c("switch", "rep"), labels = c("Switch", "Rep.")) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        #strip.text.x = element_blank(),
+        axis.line = element_line(colour = "black"),
+        #axis.text.x = element_blank(),
+        axis.title.x = element_text(color = "white"),
+        #axis.ticks = element_blank(),
+        #strip.text.x = element_blank(),
+        strip.background = element_rect(fill = "white"),
+        plot.title = element_text(hjust = 0),
+        legend.position = "none"#,
+        #text= element_text(size=18)
+        )
+```
+
+### Predicting choice behaviour
+
+```{r behavPredctingChoice, include = FALSE}
+quartilePlot <- behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(Search.RT,5),RTSpeed = as.factor(RTSpeed)) %>%
+  ungroup() %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject, RTSpeed) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+  mutate(propEasy = numEasy/totalTrials) %>%
+  ggplot(.,aes(collapseNFLR,propEasy, colour = RTSpeed, group = RTSpeed)) +
+  geom_smooth(se=FALSE)
+test <- behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = (Search.RT-Mean)/SD) %>%
+  group_by(collapseNFLR,Subject, RTSpeed) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+    ungroup()%>%
+  mutate(propEasy = numEasy/totalTrials,collapseNFLR=as.integer(collapseNFLR))
+preferencePredictionStats <- lm(propEasy ~ RTSpeed * collapseNFLR, data=test)
+#Use model to predict preferences based on some simulated RTspeed and numEasy 
+simulate = data.frame(RTSpeed = c(-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2), collapseNFLR = c(1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7))
+simulate$prediction = predict(preferencePredictionStats,simulate)
+simulatedPlot <- ggplot(simulate, aes(x=collapseNFLR, y=prediction, group = RTSpeed, color = as.factor(RTSpeed))) + geom_line()
+
+quartilePlot + simulatedPlot
+
+ggsave("Figures/BehavPredictionChoicePlots.tiff", width=22, height = 8, units = "cm")
+
+behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
+  filter(Search.RT < Cutoff) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(Search.RT,4),RTSpeed = as.factor(RTSpeed)) %>%
+  ungroup() %>%
+  mutate(Subject = "Average") %>%
+  group_by(collapseNFLR,Subject, RTSpeed) %>%
+  summarise(accuracy = mean(Search.ACC)) %>%
+  ggplot(.,aes(collapseNFLR,accuracy, colour = RTSpeed, group = RTSpeed)) +
+  geom_smooth(se=FALSE)
+#ggsave("Figures/BehavPredictionChoicePlots.tiff", width=8, height = 8, units = "cm")
+test <- behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
+  filter(Search.RT < Cutoff) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = (Search.RT-Mean)/SD) %>%
+  group_by(collapseNFLR,Subject, RTSpeed) %>%
+  summarise(accuracy = mean(Search.ACC)) %>%
+    ungroup()%>%
+  mutate(collapseNFLR=as.integer(collapseNFLR))
+accuracyPredictionStats <- lm(accuracy ~ RTSpeed * collapseNFLR, data=test)
+```
+
+If early attentional priority drives choice behaviour then we would expect set size to disproportionately affect fast responses. In order to test this we used a regression to predict easy target preference based on easy set size and response times (normalised for each participant as z-scores). The results showed a sigificant interaction between response speed and set size on a participant's preference to select the easy target, where the effect of set size on easy target preference was larger for faster trials (`r apa_print.lm(preferencePredictionStats)$full_result$RTSpeed_collapseNFLR`). To visualise this interaction, the effect of set size on easy preference was plotted separately for each response time quartile (see Figure\ \@ref(fig:behavPredictionfig)), and the model's predicted easy target preference is shown for a set of simulated response speeds. Response time speed and set size do not interact to predict accuracy (`r apa_print.lm(accuracyPredictionStats)$full_result$RTSpeed_collapseNFLR`).
+
+```{r behavPredictionfigure, fig.cap = "(ref:behavPredictionFig)"}
+include_graphics("Figures/BehavPredictionChoicePlots.tiff", auto_pdf = FALSE)
+```
+
+(ref:behavPredictionFig) Plot showing the effect of response time and easy set size on easy target preference. While in general, larger easy target set sizes lead to a decrease in the preference to select that target, this also interacts with respones time. The relationship between set size and easy target preference is steepest in the fastest quartile of trials, and relatively flat in the slowest quartile. 
 
 ## ERP results
 
@@ -755,7 +853,7 @@ include_graphics("Figures/ERPSPPT.tiff", auto_pdf = FALSE)
 
 ## Extra analyses
 
-```{r playng, include=FALSE}
+```{r eegExtras, include=FALSE}
 speedSplitPlot <- allData %>%
   filter(Event == "Search", rej == 0) %>%
   mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
@@ -802,6 +900,29 @@ blockSplitPlot <- allData %>%
     theme_apa() +
     theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
 
+speedxSplitPlot <- allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet), SimpSet = as.factor(SimpSet)) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(RT,2), ExpHalf = ntile(BlockN,2), RTSpeed = ifelse(RTSpeed==1,"Fast","Slow"), ExpHalf = ifelse(BlockN==1,"First Half","Second Half"), transition = ifelse(choseStay==1,"Stay", "Switch"), choice = ifelse(choseEasy ==1, "Diff", "Easy")) %>%
+  group_by(SimpSet,sample,Hemisphere,choice) %>%
+  summarise(mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_rect(xmin = P1pcStart, xmax = P1pcEnd, ymin = -Inf, ymax = Inf, fill = "#FFE6E6", alpha = 0.3) +
+    geom_rect(xmin = N2pcStart, xmax = N2pcEnd, ymin = Inf, ymax = -Inf, fill = "#E6FFE6", alpha = 0.3) +
+    geom_rect(xmin = SPCNStart, xmax = SPCNEnd, ymin = Inf, ymax = -Inf, fill = "#E6E6FF", alpha = 0.3) +
+    geom_line(aes(colour = SimpSet),size=1) +
+    scale_color_manual(values = my_palette) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    facet_grid(.~choice) +
+    theme_apa() +
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
+
 layout <- "
 a
 b
@@ -827,6 +948,89 @@ ggplot() +
 ggplot() +
   geom_line(data = hmData, aes(x=sample,y = diff, colour = SimpSet)) +
   facet_grid(.~deciles)
+
+
+allData <- allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  select(-c("StimTrig","Event", "EasyField", "Distance", "EasySet", "Response", "RT", "TrialN", "BlockN", "choseStay", "choseEasy"))
+notOne <- allData %>%
+  filter(RTSpeed !=1) %>%
+  mutate(RTSpeed = 1) %>%
+  group_by(SimpSet,sample,Hemisphere,RTSpeed,Subject) %>%
+  summarise(mean = mean(voltage))
+notTwo <- allData %>%
+  filter(RTSpeed !=2) %>%
+  mutate(RTSpeed = 2) %>%
+  group_by(SimpSet,sample,Hemisphere,RTSpeed, Subject) %>%
+  summarise(mean = mean(voltage))
+notThree <- allData %>%
+  filter(RTSpeed !=3) %>%
+  mutate(RTSpeed = 3) %>%
+  group_by(SimpSet,sample,Hemisphere,RTSpeed, Subject) %>%
+  summarise(mean = mean(voltage))
+notFour <- allData %>%
+  filter(RTSpeed !=4) %>%
+  mutate(RTSpeed = 4) %>%
+  group_by(SimpSet,sample,Hemisphere,RTSpeed, Subject) %>%
+  summarise(mean = mean(voltage))
+notFive <- allData %>%
+  filter(RTSpeed !=5) %>%
+  mutate(RTSpeed = 5) %>%
+  group_by(SimpSet,sample,Hemisphere,RTSpeed, Subject) %>%
+  summarise(mean = mean(voltage))
+
+jackData = rbind(notOne, notTwo, notThree, notFour, notFive)
+
+jackSpeedSplitPlot <- jackData %>%
+  group_by(SimpSet,sample,Hemisphere,RTSpeed) %>%
+  summarise(mean = mean(mean)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  ggplot(., aes(sample,diff)) +
+    geom_rect(xmin = P1pcStart, xmax = P1pcEnd, ymin = -Inf, ymax = Inf, fill = "#FFE6E6", alpha = 0.3) +
+    geom_rect(xmin = N2pcStart, xmax = N2pcEnd, ymin = Inf, ymax = -Inf, fill = "#E6FFE6", alpha = 0.3) +
+    geom_rect(xmin = SPCNStart, xmax = SPCNEnd, ymin = Inf, ymax = -Inf, fill = "#E6E6FF", alpha = 0.3) +
+    geom_line(aes(colour = as.factor(RTSpeed)),size=1) +
+    #scale_color_manual(values = my_palette) +
+    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
+    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
+    geom_vline(xintercept = 0,linetype = "dashed" ) +
+    geom_hline(yintercept = 0,linetype = "dashed") +
+    facet_grid(SimpSet~.) +
+    theme_apa() +
+    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
+
+jackp1pcValues <- jackData %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>% 
+  filter(sample>P1pcStart & sample < P1pcEnd) %>%
+  group_by(SimpSet, RTSpeed, Subject) %>%
+  summarise(p1pc= mean(diff)) %>%
+  mutate(easySet = ifelse(SimpSet=="Large", 6.5, ifelse(SimpSet == "Medium", 4,1.5)), as.factor(Subject))
+
+jackn2pcValues <- jackData %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>% 
+  filter(sample>N2pcStart & sample < N2pcEnd) %>%
+  group_by(SimpSet, RTSpeed, Subject) %>%
+  summarise(p1pc= mean(diff)) %>%
+  mutate(easySet = ifelse(SimpSet=="Large", 6.5, ifelse(SimpSet == "Medium", 4,1.5)), as.factor(Subject))
+
+jackspcnValues <- jackData %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>% 
+  filter(sample>SPCNStart & sample < SPCNEnd) %>%
+  group_by(SimpSet, RTSpeed, Subject) %>%
+  summarise(p1pc= mean(diff)) %>%
+  mutate(easySet = ifelse(SimpSet=="Large", 6.5, ifelse(SimpSet == "Medium", 4,1.5)), as.factor(Subject))
+
+summary(lmer(p1pc ~ easySet * RTSpeed + (1|Subject), data=jackp1pcValues))
+summary(lmer(p1pc ~ easySet * RTSpeed + (1|Subject), data=jackn2pcValues))
+summary(lmer(p1pc ~ easySet * RTSpeed + (1|Subject), data=jackspcnValues))
+  
 ```
 
 ```{r includingERPsplitfig, fig.cap="(ref:fullSetERPsplitCap)"}
@@ -835,7 +1039,7 @@ include_graphics("Figures/ERPSplit.tiff", auto_pdf = FALSE)
 
 (ref:fullSetERPsplitCap) Some additional analyses that may be useful (stats not run yet). I've collapsed across some set sizes in order to keep signal to noise high, and then split by median RT (top row), and experiment half (bottom row).
 
-```{r test}
+```{r behaviouralExtras, eval = FALSE}
 behavData %>%
   mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
   #filter(Search.RT < Cutoff, Search.ACC==1) %>%
@@ -861,6 +1065,17 @@ test <- behavData %>%
   mutate(totalTrials = numEasy+numDiff) %>%
     ungroup()%>%
   mutate(propEasy = numEasy/totalTrials,collapseNFLR=as.integer(collapseNFLR))
+testqstat <- lm(propEasy ~ RTSpeed * collapseNFLR, data=test)
+test <- behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = (Search.RT-Mean)/SD) %>%
+  group_by(collapseNFLR,Subject, RTSpeed) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  mutate(totalTrials = numEasy+numDiff) %>%
+    ungroup()%>%
+  mutate(propEasy = numEasy/totalTrials,collapseNFLR=as.integer(collapseNFLR))
 teststat <- lm(propEasy ~ RTSpeed * collapseNFLR, data=test)
 
 behavData %>%
@@ -877,15 +1092,15 @@ behavData %>%
   geom_line()
 test <- behavData %>%
   mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
-  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  filter(Search.RT < Cutoff) %>%
   group_by(Subject) %>%
   mutate(RTSpeed = ntile(Search.RT,4)) %>%
   group_by(collapseNFLR,Subject, RTSpeed) %>%
-  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
+  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff), Acc = mean(Search.ACC)) %>%
   mutate(totalTrials = numEasy+numDiff) %>%
     ungroup()%>%
   mutate(propEasy = numEasy/totalTrials,collapseNFLR=as.integer(collapseNFLR))
-teststat <- lm(propEasy ~ RTSpeed * collapseNFLR, data=test)
+teststat <- lm(Acc ~ RTSpeed * collapseNFLR, data=test)
 
 behavData %>%
   mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
