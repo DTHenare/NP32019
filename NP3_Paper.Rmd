@@ -266,6 +266,7 @@ allData$sample <- as.integer(substring(allData$sample,2))
 allData <- allData %>% mutate(Hemisphere = ifelse(EasyField==Hem, "Ipsilateral", "Contralateral"))
 allData$SimpSet <- allData$EasySet
 allData$SimpSet <- recode(allData$SimpSet, "1" = "Small", "2" = "Small", "3" ="Medium", "4"="Medium", "5"="Medium", "6"="Large", "7"="Large")
+allData <- allData %>% mutate(choseEasy = ifelse(EasyField == Response, 1, 0))
 
 #clear stuff that I don't need
 rm(origEpochInfo,scalpData,epochInfo,lHemData,rHemData)
@@ -586,9 +587,9 @@ choiceRTPlot <- behavData %>%
   geom_line(data = choiceRTAvg, aes(group = choice, colour = choice), size=2) +
   ggtitle("B") +
   facet_grid(.~choice) +
-  scale_colour_manual(values=c("green4", "gray42")) +
+  #scale_colour_manual(values=c("green4", "gray42")) +
   #scale_y_continuous(name = "Task choice time (ms)",limits = c(0,500)) +
-  scale_x_discrete(limits=c("switch", "rep"), labels = c("Switch", "Rep.")) +
+  #scale_x_discrete(limits=c("switch", "rep"), labels = c("Switch", "Rep.")) +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank(),
@@ -605,35 +606,55 @@ choiceRTPlot <- behavData %>%
         )
 ```
 
+```{r choiceRT}
+choiceRT.dat <- behavData %>%
+  mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch"), choice = ifelse(ChoseEasy==1, "Easy", "Diff")) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  group_by(Subject,choice, transition, NumEasy) %>%
+  summarise(mean = mean(Search.RT))
+choiceRT.stat <- aov_ez(
+  data = choiceRT.dat,
+  dv = "mean",
+  id = "Subject", 
+  within = c("transition", "choice", "NumEasy")
+)
+choiceRT.res <- apa_print(choiceRT.stat)
+choiceRT.fup <- apa_print.emmGrid(pairs(emmeans(choiceRT.stat, ~transition|choice)))
+
+```
+
+```{r }
+switchRates <- behavData %>%
+  mutate(switchcount = lag(ChoseEasy), switchcount = ifelse(is.na(switchcount), 1,switchcount)) %>%
+  group_by(NumEasy) %>%
+  summarise(switchrate = mean(switchcount))
+```
+
 ### Predicting choice behaviour
 
 ```{r behavPredctingChoice, include = FALSE}
 quartilePlot <- behavData %>%
   mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
-  filter(Search.RT < Cutoff, Search.ACC==1) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1, Search.RT > 200) %>%
   group_by(Subject) %>%
   mutate(RTSpeed = ntile(Search.RT,5),RTSpeed = as.factor(RTSpeed)) %>%
   ungroup() %>%
   mutate(Subject = "Average") %>%
   group_by(collapseNFLR,Subject, RTSpeed) %>%
-  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
-  mutate(totalTrials = numEasy+numDiff) %>%
-  mutate(propEasy = numEasy/totalTrials) %>%
+  summarise(propEasy = mean(ChoseEasy)) %>%
   ggplot(.,aes(collapseNFLR,propEasy, colour = RTSpeed, group = RTSpeed)) +
   geom_smooth(se=FALSE)
 test <- behavData %>%
   mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
-  filter(Search.RT < Cutoff, Search.ACC==1) %>%
-  group_by(Subject) %>%
+  filter(Search.RT < Cutoff, Search.ACC==1, Search.RT > 200) %>%
+  group_by(Subject, collapseNFLR) %>%
   mutate(RTSpeed = (Search.RT-Mean)/SD) %>%
-  group_by(collapseNFLR,Subject, RTSpeed) %>%
-  summarise(numEasy = sum(ChoseEasy), numDiff = sum(ChoseDiff)) %>%
-  mutate(totalTrials = numEasy+numDiff) %>%
-    ungroup()%>%
-  mutate(propEasy = numEasy/totalTrials,collapseNFLR=as.integer(collapseNFLR))
-preferencePredictionStats <- lm(propEasy ~ RTSpeed * collapseNFLR, data=test)
+  summarise(RTSpeed = mean(RTSpeed), propEasy = mean(ChoseEasy)) %>%
+  ungroup() %>%
+  mutate(collapseNFLR=as.integer(collapseNFLR))
+preferencePredictionStats <- lmer(propEasy ~ RTSpeed * collapseNFLR + (1+collapseNFLR|Subject), data=test)
 #Use model to predict preferences based on some simulated RTspeed and numEasy 
-simulate = data.frame(RTSpeed = c(-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2), collapseNFLR = c(1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7))
+simulate = data.frame(RTSpeed = c(-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2), collapseNFLR = c(1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7), Subject = rep(1,35))
 simulate$prediction = predict(preferencePredictionStats,simulate)
 simulatedPlot <- ggplot(simulate, aes(x=collapseNFLR, y=prediction, group = RTSpeed, color = as.factor(RTSpeed))) + geom_line()
 
@@ -950,87 +971,137 @@ ggplot() +
   facet_grid(.~deciles)
 
 
-allData <- allData %>%
+
+p1pc <- allData %>%
   filter(Event == "Search", rej == 0) %>%
-  mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
+  mutate(sample = sample*2-baseline) %>%
   group_by(Subject) %>%
   mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
-  select(-c("StimTrig","Event", "EasyField", "Distance", "EasySet", "Response", "RT", "TrialN", "BlockN", "choseStay", "choseEasy"))
-notOne <- allData %>%
-  filter(RTSpeed !=1) %>%
-  mutate(RTSpeed = 1) %>%
-  group_by(SimpSet,sample,Hemisphere,RTSpeed,Subject) %>%
-  summarise(mean = mean(voltage))
-notTwo <- allData %>%
-  filter(RTSpeed !=2) %>%
-  mutate(RTSpeed = 2) %>%
-  group_by(SimpSet,sample,Hemisphere,RTSpeed, Subject) %>%
-  summarise(mean = mean(voltage))
-notThree <- allData %>%
-  filter(RTSpeed !=3) %>%
-  mutate(RTSpeed = 3) %>%
-  group_by(SimpSet,sample,Hemisphere,RTSpeed, Subject) %>%
-  summarise(mean = mean(voltage))
-notFour <- allData %>%
-  filter(RTSpeed !=4) %>%
-  mutate(RTSpeed = 4) %>%
-  group_by(SimpSet,sample,Hemisphere,RTSpeed, Subject) %>%
-  summarise(mean = mean(voltage))
-notFive <- allData %>%
-  filter(RTSpeed !=5) %>%
-  mutate(RTSpeed = 5) %>%
-  group_by(SimpSet,sample,Hemisphere,RTSpeed, Subject) %>%
-  summarise(mean = mean(voltage))
-
-jackData = rbind(notOne, notTwo, notThree, notFour, notFive)
-
-jackSpeedSplitPlot <- jackData %>%
-  group_by(SimpSet,sample,Hemisphere,RTSpeed) %>%
-  summarise(mean = mean(mean)) %>%
-  spread(Hemisphere, mean) %>% 
-  mutate(diff = Contralateral - Ipsilateral) %>%
-  ggplot(., aes(sample,diff)) +
-    geom_rect(xmin = P1pcStart, xmax = P1pcEnd, ymin = -Inf, ymax = Inf, fill = "#FFE6E6", alpha = 0.3) +
-    geom_rect(xmin = N2pcStart, xmax = N2pcEnd, ymin = Inf, ymax = -Inf, fill = "#E6FFE6", alpha = 0.3) +
-    geom_rect(xmin = SPCNStart, xmax = SPCNEnd, ymin = Inf, ymax = -Inf, fill = "#E6E6FF", alpha = 0.3) +
-    geom_line(aes(colour = as.factor(RTSpeed)),size=1) +
-    #scale_color_manual(values = my_palette) +
-    scale_x_continuous(name ="Latency (ms)", expand = c(0, 0)) +
-    scale_y_reverse(name =expression(paste("Amplitude (",mu,"v)")), expand = c(0, 0)) +
-    geom_vline(xintercept = 0,linetype = "dashed" ) +
-    geom_hline(yintercept = 0,linetype = "dashed") +
-    facet_grid(SimpSet~.) +
-    theme_apa() +
-    theme(panel.spacing.y = unit(2, "lines"), text= element_text(size=12))
-
-jackp1pcValues <- jackData %>%
+  select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "choseEasy")) %>%
+  group_by(EasySet,sample,Hemisphere,RTSpeed, Subject) %>%
+  summarise(mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>% 
   filter(sample>P1pcStart & sample < P1pcEnd) %>%
-  group_by(SimpSet, RTSpeed, Subject) %>%
-  summarise(p1pc= mean(diff)) %>%
-  mutate(easySet = ifelse(SimpSet=="Large", 6.5, ifelse(SimpSet == "Medium", 4,1.5)), as.factor(Subject))
+  group_by(EasySet, RTSpeed, Subject) %>%
+  summarise(p1pc= mean(diff))
+summary(lmer(p1pc ~ EasySet * RTSpeed + (1|Subject), data=p1pc))
 
-jackn2pcValues <- jackData %>%
+n2pc <- allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "choseEasy")) %>%
+  group_by(EasySet,sample,Hemisphere,RTSpeed, Subject) %>%
+  summarise(mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>% 
   filter(sample>N2pcStart & sample < N2pcEnd) %>%
-  group_by(SimpSet, RTSpeed, Subject) %>%
-  summarise(p1pc= mean(diff)) %>%
-  mutate(easySet = ifelse(SimpSet=="Large", 6.5, ifelse(SimpSet == "Medium", 4,1.5)), as.factor(Subject))
+  group_by(EasySet, RTSpeed, Subject) %>%
+  summarise(p1pc= mean(diff))
+summary(lmer(p1pc ~ EasySet * RTSpeed + (1|Subject), data=n2pc))
 
-jackspcnValues <- jackData %>%
+p1pc <- allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
+  filter(sample > P1pcStart & sample < P1pcEnd) %>%
+  group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
+  summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
-  mutate(diff = Contralateral - Ipsilateral) %>% 
-  filter(sample>SPCNStart & sample < SPCNEnd) %>%
-  group_by(SimpSet, RTSpeed, Subject) %>%
-  summarise(p1pc= mean(diff)) %>%
-  mutate(easySet = ifelse(SimpSet=="Large", 6.5, ifelse(SimpSet == "Medium", 4,1.5)), as.factor(Subject))
+  mutate(diff = Contralateral - Ipsilateral)
+n2pc <- allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
+  filter(sample > N2pcStart & sample < N2pcEnd) %>%
+  group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
+  summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral)
+spcn <- allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
+  filter(sample > SPCNStart & sample < SPCNEnd) %>%
+  group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
+  summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral)
+summary(lmer(propEasy ~ EasySet * diff + (1|Subject), data=p1pc))
+summary(lmer(propEasy ~ EasySet * diff + (1|Subject), data=n2pc))
+summary(lmer(propEasy ~ EasySet * diff + (1|Subject), data=spcn))
 
-summary(lmer(p1pc ~ easySet * RTSpeed + (1|Subject), data=jackp1pcValues))
-summary(lmer(p1pc ~ easySet * RTSpeed + (1|Subject), data=jackn2pcValues))
-summary(lmer(p1pc ~ easySet * RTSpeed + (1|Subject), data=jackspcnValues))
+p1pcmodel <- lmer(propEasy ~ EasySet * diff + (1+EasySet|Subject), data=p1pc)
+n2pcmodel <- lmer(propEasy ~ EasySet * diff + (1+EasySet|Subject), data=n2pc)
+spcnmodel <- lmer(propEasy ~ EasySet * diff + (1+EasySet|Subject), data=spcn)
+#predictionStats <- lmer(propEasy ~ EasySet * diff + (1|Subject), data=n2pc)
+#Use model to predict preferences based on some simulated RTspeed and numEasy 
+simulate = data.frame(diff = c(-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2), EasySet = c(1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7), Subject = rep(2,35))
+simulate$p1pcPrediction = predict(p1pcmodel,simulate)
+simulate$n2pcPrediction = predict(n2pcmodel,simulate)
+simulate$spcnPrediction = predict(spcnmodel,simulate)
+ggplot(simulate, aes(x=EasySet, y=p1pcPrediction, group = diff, color = as.factor(diff))) + geom_line()
+ggplot(simulate, aes(x=EasySet, y=n2pcPrediction, group = diff, color = as.factor(diff))) + geom_line()
+ggplot(simulate, aes(x=EasySet, y=spcnPrediction, group = diff, color = as.factor(diff))) + geom_line()
+
+allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
+  filter(sample > P1pcStart & sample < P1pcEnd) %>%
+  group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
+  summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  mutate(diffQrt = as.factor(ntile(diff,4))) %>%
+  group_by(EasySet, diffQrt) %>%
+  summarise(propEasy = mean(propEasy), diff = as.factor(mean(diff))) %>%
+  ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = diffQrt)) +
+  geom_line()
+allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
+  filter(sample > N2pcStart & sample < N2pcEnd) %>%
+  group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
+  summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  mutate(diffQrt = as.factor(ntile(diff,4))) %>%
+  group_by(EasySet, diffQrt) %>%
+  summarise(propEasy = mean(propEasy), diff = as.factor(mean(diff))) %>%
+  ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = diffQrt)) +
+  geom_line()
+allData %>%
+  filter(Event == "Search", rej == 0) %>%
+  mutate(sample = sample*2-baseline) %>%
+  group_by(Subject) %>%
+  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
+  filter(sample > SPCNStart & sample < SPCNEnd) %>%
+  group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
+  summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
+  spread(Hemisphere, mean) %>% 
+  mutate(diff = Contralateral - Ipsilateral) %>%
+  mutate(diffQrt = as.factor(ntile(diff,4))) %>%
+  group_by(EasySet, diffQrt) %>%
+  summarise(propEasy = mean(propEasy), diff = as.factor(mean(diff))) %>%
+  ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = diffQrt)) +
+  geom_line()
   
+
 ```
 
 ```{r includingERPsplitfig, fig.cap="(ref:fullSetERPsplitCap)"}
