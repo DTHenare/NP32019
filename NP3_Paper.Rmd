@@ -60,7 +60,7 @@ set.seed(4609948)
 knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 library(knitr)
 opts_chunk$set(echo = FALSE)
-library("papaja")
+library(papaja)
 library(tidyr)
 library(dplyr)
 library(ggplot2)
@@ -546,7 +546,7 @@ include_graphics("Figures/BehaviouralPlots.tiff", auto_pdf = FALSE)
 
 ### Choice behaviour
 
-```{r choiceBehaviour}
+```{r choiceBehaviour, include = FALSE}
 choicePercent <- behavData %>%
   mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
   filter(Search.RT < Cutoff, Search.ACC==1) %>%
@@ -619,8 +619,7 @@ choiceRT.stat <- aov_ez(
   within = c("transition", "choice", "NumEasy")
 )
 choiceRT.res <- apa_print(choiceRT.stat)
-choiceRT.fup <- apa_print.emmGrid(pairs(emmeans(choiceRT.stat, ~transition|choice)))
-
+choiceRT.fup <- apa_print(pairs(emmeans(choiceRT.stat, ~transition|choice)))
 ```
 
 ```{r }
@@ -637,7 +636,7 @@ quartilePlot <- behavData %>%
   mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
   filter(Search.RT < Cutoff, Search.ACC==1, Search.RT > 200) %>%
   group_by(Subject) %>%
-  mutate(RTSpeed = ntile(Search.RT,5),RTSpeed = as.factor(RTSpeed)) %>%
+  mutate(RTSpeed = ntile(Search.RT,4),RTSpeed = as.factor(RTSpeed)) %>%
   ungroup() %>%
   mutate(Subject = "Average") %>%
   group_by(collapseNFLR,Subject, RTSpeed) %>%
@@ -652,9 +651,9 @@ test <- behavData %>%
   summarise(RTSpeed = mean(RTSpeed), propEasy = mean(ChoseEasy)) %>%
   ungroup() %>%
   mutate(collapseNFLR=as.integer(collapseNFLR))
-preferencePredictionStats <- lmer(propEasy ~ RTSpeed * collapseNFLR + (1+collapseNFLR|Subject), data=test)
+preferencePredictionStats <- lmer(propEasy ~ RTSpeed * collapseNFLR + (1|Subject), data=test)
 #Use model to predict preferences based on some simulated RTspeed and numEasy 
-simulate = data.frame(RTSpeed = c(-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2), collapseNFLR = c(1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7), Subject = rep(1,35))
+simulate = data.frame(RTSpeed = c(-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1), collapseNFLR = c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7), Subject = rep(1,28))
 simulate$prediction = predict(preferencePredictionStats,simulate)
 simulatedPlot <- ggplot(simulate, aes(x=collapseNFLR, y=prediction, group = RTSpeed, color = as.factor(RTSpeed))) + geom_line()
 
@@ -686,13 +685,13 @@ test <- behavData %>%
 accuracyPredictionStats <- lm(accuracy ~ RTSpeed * collapseNFLR, data=test)
 ```
 
-If early attentional priority drives choice behaviour then we would expect set size to disproportionately affect fast responses. In order to test this we used a regression to predict easy target preference based on easy set size and response times (normalised for each participant as z-scores). The results showed a sigificant interaction between response speed and set size on a participant's preference to select the easy target, where the effect of set size on easy target preference was larger for faster trials (`r apa_print.lm(preferencePredictionStats)$full_result$RTSpeed_collapseNFLR`). To visualise this interaction, the effect of set size on easy preference was plotted separately for each response time quartile (see Figure\ \@ref(fig:behavPredictionfig)), and the model's predicted easy target preference is shown for a set of simulated response speeds. Response time speed and set size do not interact to predict accuracy (`r apa_print.lm(accuracyPredictionStats)$full_result$RTSpeed_collapseNFLR`).
+If early attentional priority drives choice behaviour then we would expect set size to disproportionately affect fast responses. In order to test this we used a regression to predict easy target preference based on easy set size and response times (normalised for each participant as z-scores). The results showed a sigificant interaction between response speed and set size on a participant's preference to select the easy target, where the effect of set size on easy target preference was larger for faster trials (`r apa_print(preferencePredictionStats)$full_result$RTSpeed_collapseNFLR`). To visualise this interaction, the effect of set size on easy preference was plotted separately for each response time quartile (see Figure\ \@ref(fig:behavPredictionfig)), and the model's predicted easy target preference is shown for a set of simulated response speeds. Response time speed and set size do not interact to predict accuracy (`r apa_print(accuracyPredictionStats)$full_result$RTSpeed_collapseNFLR`).
 
-```{r behavPredictionfigure, fig.cap = "(ref:behavPredictionFig)"}
+```{r behavPredictionfig, fig.cap = "(ref:behavPredictionfig)"}
 include_graphics("Figures/BehavPredictionChoicePlots.tiff", auto_pdf = FALSE)
 ```
 
-(ref:behavPredictionFig) Plot showing the effect of response time and easy set size on easy target preference. While in general, larger easy target set sizes lead to a decrease in the preference to select that target, this also interacts with respones time. The relationship between set size and easy target preference is steepest in the fastest quartile of trials, and relatively flat in the slowest quartile. 
+(ref:behavPredictionfig) Plot showing the effect of response time and easy set size on easy target preference. While in general, larger easy target set sizes lead to a decrease in the preference to select that target, this also interacts with response time. The relationship between set size and easy target preference is steepest in the fastest quartile of trials, and relatively flat in the slowest quartile. 
 
 ## ERP results
 
@@ -874,7 +873,7 @@ include_graphics("Figures/ERPSPPT.tiff", auto_pdf = FALSE)
 
 ## Predicting choice
 
-```{r ERPPredictChoice}
+```{r ERPPredictChoice, include=FALSE}
 p1pc <- allData %>%
   filter(Event == "Search", rej == 0) %>%
   mutate(sample = sample*2-baseline) %>%
@@ -912,12 +911,12 @@ summary(lmer(propEasy ~ EasySet * diff + (1|Subject), data=p1pc))
 summary(lmer(propEasy ~ EasySet * diff + (1|Subject), data=n2pc))
 summary(lmer(propEasy ~ EasySet * diff + (1|Subject), data=spcn))
 
-p1pcmodel <- lmer(propEasy ~ EasySet * diff + (1+EasySet|Subject), data=p1pc)
-n2pcmodel <- lmer(propEasy ~ EasySet * diff + (1+EasySet|Subject), data=n2pc)
-spcnmodel <- lmer(propEasy ~ EasySet * diff + (1+EasySet|Subject), data=spcn)
+p1pcmodel <- lmer(propEasy ~ EasySet * diff + (1|Subject), data=p1pc)
+n2pcmodel <- lmer(propEasy ~ EasySet * diff + (1|Subject), data=n2pc)
+spcnmodel <- lmer(propEasy ~ EasySet * diff + (1|Subject), data=spcn)
 #predictionStats <- lmer(propEasy ~ EasySet * diff + (1|Subject), data=n2pc)
 #Use model to predict preferences based on some simulated RTspeed and numEasy 
-simulate = data.frame(diff = c(-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2,-2, -1, 0, 1, 2), EasySet = c(1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7), Subject = rep(2,35))
+simulate = data.frame(diff = c(-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1), EasySet = c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7), Subject = rep(2,28))
 simulate$p1pcPrediction = predict(p1pcmodel,simulate)
 simulate$n2pcPrediction = predict(n2pcmodel,simulate)
 simulate$spcnPrediction = predict(spcnmodel,simulate)
@@ -929,14 +928,14 @@ p1pcQuintPlot <- allData %>%
   filter(Event == "Search", rej == 0) %>%
   mutate(sample = sample*2-baseline) %>%
   group_by(Subject) %>%
-  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  mutate(RTSpeed = ntile(RT,5), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
   select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
   filter(sample > P1pcStart & sample < P1pcEnd) %>%
   group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
   summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>%
-  mutate(diffQrt = as.factor(ntile(diff,4))) %>%
+  mutate(diffQrt = as.factor(ntile(diff,5))) %>%
   group_by(EasySet, diffQrt) %>%
   summarise(propEasy = mean(propEasy), diff = as.factor(mean(diff))) %>%
   ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = diffQrt)) +
@@ -945,14 +944,14 @@ n2pcQuintPlot <- allData %>%
   filter(Event == "Search", rej == 0) %>%
   mutate(sample = sample*2-baseline) %>%
   group_by(Subject) %>%
-  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  mutate(RTSpeed = ntile(RT,5), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
   select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
   filter(sample > N2pcStart & sample < N2pcEnd) %>%
   group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
   summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>%
-  mutate(diffQrt = as.factor(ntile(diff,4))) %>%
+  mutate(diffQrt = as.factor(ntile(diff,5))) %>%
   group_by(EasySet, diffQrt) %>%
   summarise(propEasy = mean(propEasy), diff = as.factor(mean(diff))) %>%
   ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = diffQrt)) +
@@ -961,14 +960,14 @@ spcnQuintPlot <- allData %>%
   filter(Event == "Search", rej == 0) %>%
   mutate(sample = sample*2-baseline) %>%
   group_by(Subject) %>%
-  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  mutate(RTSpeed = ntile(RT,5), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
   select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
   filter(sample > SPCNStart & sample < SPCNEnd) %>%
   group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
   summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>%
-  mutate(diffQrt = as.factor(ntile(diff,4))) %>%
+  mutate(diffQrt = as.factor(ntile(diff,5))) %>%
   group_by(EasySet, diffQrt) %>%
   summarise(propEasy = mean(propEasy), diff = as.factor(mean(diff))) %>%
   ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = diffQrt)) +
@@ -986,11 +985,11 @@ ggsave("Figures/ERPPredictionPlot.tiff", dpi=100, width=32, height = 8, units = 
 include_graphics("Figures/ERPPredictionPlot.tiff", auto_pdf = FALSE)
 ```
 
-(ref:ERPPredPlot) plots showing choice preference, accracy, and RT as a function of easy set size.
+(ref:ERPPredPlot) plots showing choice preference, accuracy, and RT as a function of easy set size.
 
 ## Extra analyses
 
-```{r eegExtras, include=FALSE}
+```{r eegExtras, include=FALSE, eval = FALSE}
 speedSplitPlot <- allData %>%
   filter(Event == "Search", rej == 0) %>%
   mutate(sample = sample*2-baseline, EasySet = as.factor(EasySet)) %>%
@@ -1086,7 +1085,19 @@ ggplot() +
   geom_line(data = hmData, aes(x=sample,y = diff, colour = SimpSet)) +
   facet_grid(.~deciles)
 
+tryout <- allData %>%
+  mutate(choseEasy = ifelse(EasyField==Response, 1, 0)) %>%
+  filter(sample > N2pcStart & sample < N2pcEnd, rej == 0) %>%
+  group_by(TrialN,Hemisphere, Subject, EasySet, choseEasy) %>%
+  summarise(voltage = mean(voltage)) %>%
+  mutate(TrialZ = TrialN)
 
+model <- lm(voltage ~ Hemisphere + (1 + Hemisphere|TrialN) + (1 + Hemisphere|Subject), data=tryout)
+m <- lmer(voltage ~ Hemisphere + (Hemisphere|Subject), tryout)
+summary(lmer(choseEasy ~ EasySet * voltage * Hemisphere + (1+EasySet|Subject), data=tryout))
+summary(glmer(choseEasy ~ EasySet * voltage * Hemisphere + (1+EasySet|Subject), data=tryout, family = binomial))
+model <- lmer(choseEasy ~ voltage*EasySet +(voltage*EasySet|TrialN), data=tryout)
+tryout$predicted <- predict(model, tryout)
 ```
 
 ```{r includingERPsplitfig, fig.cap="(ref:fullSetERPsplitCap)"}
