@@ -60,6 +60,7 @@ set.seed(4609948)
 knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 library(knitr)
 opts_chunk$set(echo = FALSE)
+opts_chunk$set(include = FALSE)
 library(papaja)
 library(tidyr)
 library(dplyr)
@@ -130,15 +131,15 @@ In everyday environments people need to make choices about where to allocate the
 
 `r #target identificationXdiscriminability/set sizeXtask difficulty/`
 
-In the field of cognitive neuroscience, the attention system is presumed to be central to this type of search optimisation. Attention is typically considered a gating mechanism for the vast amount of information available in the outside world, and is therefore the mechanism by which we isolate relevant, and important information while ignoring irrelevant and distracting information. Seminal work in this literature has relied on a broad set of experimental paradigms where participants search for predefined targets amoung a set of irrelevant distractor or filler objects. Targets can be defined in a number of ways, for example, by being confined to a specific location, possessing a specific feature, or by more abstract criteria like being an oddball [@bacon1994overriding;@pashler1988cross] or member of a semantic category [@barnard2004paying;@leblanc2007can;@wyble2009categorically;@wyble2013contingent]. Results consistently show that stimuli matching the target criteria benefit from enhanced processing as a consequence of attention allocation. Additionally, targets can be defined by a conjunction of features, in which case participants adapt their search strategy in order to focus on the feature that most efficiently limits how many items they must search through (Egeth, Virzi, & Garbart, 1984; Shen, Reingold, & Pomplun, 2000; Sobel & Cave, 2002). In the vast majority of visual search tasks demonstrating the role that attention plays in optimising search performance, participants are assigned the target object by an experimenter and then search for this object on each trial. In real world visual scenes, however, there may be a number of ways of achieving an individual’s goals and therefore more than one object which could be selected as the target.
+In the field of cognitive neuroscience, the attention system is presumed to be central to this type of search optimisation. Attention is typically considered a gating mechanism for the vast amount of information available in the outside world, and is therefore the mechanism by which we isolate relevant, and important information while ignoring irrelevant and distracting information. Seminal work in this literature has relied on a broad set of experimental paradigms where participants search for predefined targets amoung a set of irrelevant distractor or filler objects. Targets can be defined in a number of ways, for example, by being confined to a specific location, possessing a specific feature, or by more abstract criteria like being an oddball [@bacon1994overriding;@pashler1988cross] or member of a semantic category [@barnard2004paying;@leblanc2007can;@wyble2009categorically;@wyble2013contingent]. Results consistently show that stimuli matching the target criteria benefit from enhanced processing as a consequence of attention allocation. Additionally, targets can be defined by a conjunction of features, in which case participants adapt their search strategy in order to focus on the feature that most efficiently limits how many items they must search through (Egeth, Virzi, & Garbart, 1984; Shen, Reingold, & Pomplun, 2000; Sobel & Cave, 2002). In the vast majority of visual search tasks that demonstrate the role of attention in search performance, participants are assigned the target object by an experimenter and then search for this object on each trial. In real world visual scenes, however, there may be a number of ways of achieving an individual’s goals and therefore more than one object which could be selected as the target.
 
 Recently, researchers have started to use paradgims with more realistic task demands in as much as they offer participants some choice over how they respond on each trial. Navalpakkama, Koch, Rangelc, and Peronab (2010) used a search task in which participants could choose to respond to either the horizontal or vertical bar in a circle of distractors. They manipulated two factors that have been shown to separately affect attention, namely, the physical salience and reward value of the two target bars. Their results showed that participants were able to dynamically trade-off between these two factors in order to optimally respond to the displays and maximise their reward. A similar effect was observed by Irons and Leber (2016) who used a paradigm in which participants can choose to respond to either a red or blue target on each trial. When they manipulate the ratio of red to blue distractors across trials in a predicatable fashion, their results showed that participants will often switch their target preference based on the distractor set size. In effect, people will opt for the blue target when there are a small number of blue items to search through, and switch to the red target when there are a small number of red items.
 
 The results of Irons and Leber (2016) also highlighted the role that effort minimisation plays in participant choices. In their case, the ratio of blue to red distractors changed predictably and gradually across trials, such that participants moved from contexts dominated by one colour, through contexts in which it was balanced, to contexts dominated by the opposing colour. Results showed that rather than switching target as soon as the displays moved past the balanced point, participants had a small delay in when they finally decided to switch target. The explanation for this was that switching target templates itself requires some amount of effort and therefore effort minimisation incentivised participants to stay on the current target choice for some time after it became a member of the larger set size. Similar effects are observed in voluntary task swtiching paradigms where participants are performing two intermingled tasks but have a choice over which task to perform on each trial. Results from these studies show a consistent stay preference, in which participants are more likely to repeat the previous task when given a choice than switch to the opposing task (refs). Fndings involving set size and effort minimisation suggest that when task demands are more open, and complex, participant responses imply an attempt at navigating these opposing factors to behave efficiently.
 
-While studies like these have established that a person's choices reflect the outcome of a flexible and dynamic process which aims to optimise their performance, we do not yet understand the role that early stages of attention play in directing downstream choice behviour. One might assume that objects which grab attention in the early stages of processing are more likely to be chosen for action at later stages. However, this need not be the case. It is plossible that while attention proceses play a role in identifying the set of possible items of interest, that the intervening period between initial attentional biases and later choice behaviour allows for individuals to contradict the objects which grabbed attention. The studies outlined above incorporating open task demands have typically relied on the measurement of overt behaviours like manual responses. By focusing on the final output of neural processing these studies are limited in their ability to dissociate the role of early visual processes from later, high level decisional processes.  `r #(single trial analyses to ook at N2pc precedig fast vs slow choices? as index of attenion leading choice) Or it could be that choice drives attention. Selecetd item, assuming it achieves goal, is reinforced for selection next time (in this case, correct trials would lead to larger N2pc for same choice obejct, and highger chance of reselecting - incorrect trials would not, but return to 50% rather than become aversive?). `
+While studies like these have established that a person's choices reflect the outcome of a flexible and dynamic process which aims to optimise their performance, we do not yet understand the role that early stages of attention play in directing downstream choice behaviour. One might assume that objects which grab attention in the early stages of processing are more likely to be chosen for action at later stages. However, this need not be the case. It is possible that while attention processes play a role in identifying the set of possible items of interest, that the intervening period between initial attentional biases and later choice behaviour allows for individuals to contradict initial attention biases . The studies outlined above incorporating open task demands have typically relied on the measurement of overt behaviours like manual responses. By focusing on the final output of neural processing these studies are limited in their ability to dissociate the role of early visual processes from later, high level decisional processes.  `r #(single trial analyses to ook at N2pc precedig fast vs slow choices? as index of attenion leading choice) Or it could be that choice drives attention. Selecetd item, assuming it achieves goal, is reinforced for selection next time (in this case, correct trials would lead to larger N2pc for same choice obejct, and highger chance of reselecting - incorrect trials would not, but return to 50% rather than become aversive?). `
 
-In the field of visual attention, a detailed understanding of attentional control and prioritisation has benefitted from the use of EEG to record neural activity while participants perform search tasks. In particular, a component of the event-related potential referred to as N2pc has been used to probe the attention system and measure attention allocation. N2pc is measured as an enhanced negativity at posterior electrode sites contralateral to an attended item, ocurring approximately 200ms post-stimulus onset. Not only does the presence of an N2pc indicate the visual field in which attention has been deployed, but the amplitude of the N2pc component appears to index the efficiency of selection in that location. N2pc is larger for eg. when...
+In the field of visual attention, a detailed understanding of attentional control and prioritisation has benefitted from the use of EEG to record neural activity while participants perform search tasks. In particular, a component of the event-related potential referred to as N2pc has been used to probe the attention system and measure attention allocation. N2pc is measured as an enhanced negativity at posterior electrode sites contralateral to an attended item, occurring approximately 200ms post-stimulus onset. Not only does the presence of an N2pc indicate the visual field in which attention has been deployed, but the amplitude of the N2pc component appears to index the efficiency of selection in that location. N2pc is larger for eg. when...
 
 In the present experiemtn we aimed to evaluate the impact that initial attentional biases have on driving downstream decisions using a paradigm which allows 
 
@@ -175,7 +176,7 @@ Participants were tested in two separate sessions that were no more than 2 days 
 
 ### EEG task
 
-```{r EEGTaskFigure, fig.cap = "(ref:EEGTaskFigs)"}
+```{r EEGTaskFigure, fig.cap = "(ref:EEGTaskFigs)", include = TRUE}
 include_graphics("Figures/NP3 images.png", auto_pdf = FALSE)
 ```
 
@@ -290,10 +291,10 @@ for (i in unique(allData$Subject)) {
 }
 eegExclusions = sum(subjRej$rej)
 eegRemain = length(subjRej$rej)-eegExclusions
-trialNmin = min(subjRej$trialCount)
-trialNmax = max(subjRej$trialCount)
-trialNmean = mean(subjRej$trialCount)
-trialNsd = sd(subjRej$trialCount)
+trialNmin = min(subjRej$trialCount[subjRej$rej == 0])
+trialNmax = max(subjRej$trialCount[subjRej$rej == 0])
+trialNmean = mean(subjRej$trialCount[subjRej$rej == 0])
+trialNsd = sd(subjRej$trialCount[subjRej$rej == 0])
 ```
 
 ```{r grandAverageERP, include = FALSE}
@@ -389,7 +390,7 @@ EEG data were processed using the EEGLAB toolbox in MATLAB. First, data were dow
 
 ## Statistical analysis
 
-Throughout the results, the independent variable of interest was the ratio of easy to difficult coloured rings. This varied uniformly from 1:7 to 7:1 and therefore we expected any effects to be a linear effects of this ratio on our dependent measures. For each analysis, therefore, a linear contrast was used to test for the effect of easy to difficult ratio on the relevant measures. Dependent measures included target preference (the percentage of trials where participants selected the easy target), response time, accuracy, and lateralised ERP component amplitudes (N2pc, P1PC, and SPCN).
+Throughout the results, the independent variable of interest was the ratio of easy to difficult coloured rings. This varied uniformly from 1:7 to 7:1 and therefore we expected any effects to be linear effects of this ratio on our dependent measures. For each analysis, therefore, a linear contrast was used to test for the effect of easy to difficult ratio on the relevant measures. Dependent measures included target preference (the percentage of trials where participants selected the easy target), response time, accuracy, and lateralised ERP component amplitudes (N2pc, P1PC, and SPCN). We were also interested in evaluating the effect of behavioural and neural measures on a participant's target choice. To this end, we used easy target preference (percentage of trials where participants chose the easy target) as a dependent variable and used linear mixed models to predict easy target preference. In the case of the behavioural data we used set size condition and normalised response time as predictors (with subject entered as a random effect). With the neural data we performed a separate regression for each ERP component (P1pc, N2pc, and SPCN), component amplitude and set size were used as predictors, while subject was entered as a random effect.
 
 # Results
 
@@ -538,13 +539,13 @@ ggsave("Figures/BehaviouralPlots.tiff", dpi=100, width=32, height = 8, units = "
 
 Linear modelling showed a significant effect of set size on target choice where easy target preference (the likelihood of responding to the easy target) decreased as the number of easy-coloured rings increased (`r apa_print(choiceresult)$full_result$collapseNFLR_L`). We did not see any effect of set size on response times (`r apa_print(rtresult)$full_result$collapseNFLR_L`), nor any effect of set size on accuracy (`r apa_print(accresult)$full_result$collapseNFLR_L`).
 
-```{r behavfig, fig.cap = "(ref:behavPlot)"}
+```{r behavfig, fig.cap = "(ref:behavPlot)", include = TRUE}
 include_graphics("Figures/BehaviouralPlots.tiff", auto_pdf = FALSE)
 ```
 
 (ref:behavPlot) plots showing choice preference, accracy, and RT as a function of easy set size.
 
-### Choice behaviour
+`r #Choice behaviour`
 
 ```{r choiceBehaviour, include = FALSE}
 choicePercent <- behavData %>%
@@ -606,7 +607,7 @@ choiceRTPlot <- behavData %>%
         )
 ```
 
-```{r choiceRT}
+```{r choiceRT, include = FALSE}
 choiceRT.dat <- behavData %>%
   mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch"), choice = ifelse(ChoseEasy==1, "Easy", "Diff")) %>%
   filter(Search.RT < Cutoff, Search.ACC==1) %>%
@@ -642,7 +643,8 @@ quartilePlot <- behavData %>%
   group_by(collapseNFLR,Subject, RTSpeed) %>%
   summarise(propEasy = mean(ChoseEasy)) %>%
   ggplot(.,aes(collapseNFLR,propEasy, colour = RTSpeed, group = RTSpeed)) +
-  geom_smooth(se=FALSE)
+  geom_smooth(se=FALSE) +
+  theme_apa()
 test <- behavData %>%
   mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
   filter(Search.RT < Cutoff, Search.ACC==1, Search.RT > 200) %>%
@@ -655,7 +657,9 @@ preferencePredictionStats <- lmer(propEasy ~ RTSpeed * collapseNFLR + (1|Subject
 #Use model to predict preferences based on some simulated RTspeed and numEasy 
 simulate = data.frame(RTSpeed = c(-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1), collapseNFLR = c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7), Subject = rep(1,28))
 simulate$prediction = predict(preferencePredictionStats,simulate)
-simulatedPlot <- ggplot(simulate, aes(x=collapseNFLR, y=prediction, group = RTSpeed, color = as.factor(RTSpeed))) + geom_line()
+simulatedPlot <- ggplot(simulate, aes(x=collapseNFLR, y=prediction, group = RTSpeed, color = as.factor(RTSpeed))) + 
+  geom_line() + 
+  theme_apa()
 
 quartilePlot | simulatedPlot
 
@@ -671,7 +675,8 @@ behavData %>%
   group_by(collapseNFLR,Subject, RTSpeed) %>%
   summarise(accuracy = mean(Search.ACC)) %>%
   ggplot(.,aes(collapseNFLR,accuracy, colour = RTSpeed, group = RTSpeed)) +
-  geom_smooth(se=FALSE)
+  geom_smooth(se=FALSE) +
+  theme_apa()
 #ggsave("Figures/BehavPredictionChoicePlots.tiff", width=8, height = 8, units = "cm")
 test <- behavData %>%
   mutate(transition = ifelse(ChoseEasy==lag(ChoseEasy),"Stay", "Switch")) %>%
@@ -685,17 +690,19 @@ test <- behavData %>%
 accuracyPredictionStats <- lm(accuracy ~ RTSpeed * collapseNFLR, data=test)
 ```
 
-If early attentional priority drives choice behaviour then we would expect set size to disproportionately affect fast responses. In order to test this we used a regression to predict easy target preference based on easy set size and response times (normalised for each participant as z-scores). The results showed a sigificant interaction between response speed and set size on a participant's preference to select the easy target, where the effect of set size on easy target preference was larger for faster trials (`r apa_print(preferencePredictionStats)$full_result$RTSpeed_collapseNFLR`). To visualise this interaction, the effect of set size on easy preference was plotted separately for each response time quartile (see Figure\ \@ref(fig:behavPredictionfig)), and the model's predicted easy target preference is shown for a set of simulated response speeds. Response time speed and set size do not interact to predict accuracy (`r apa_print(accuracyPredictionStats)$full_result$RTSpeed_collapseNFLR`).
+If early attentional priority drives choice behaviour then we would expect set size to disproportionately affect fast responses. In order to test this we used a regression to predict easy target preference based on easy set size and response times (normalised within each participant as z-scores). The results showed a significant interaction between response speed and set size on a participant's preference to select the easy target, where the effect of set size on easy target preference was larger for faster trials (`r apa_print(preferencePredictionStats)$full_result$RTSpeed_collapseNFLR`). To visualise this interaction, the effect of set size on easy preference was plotted separately for each response time quartile (see Figure\ \@ref(fig:behavPredictionfig)), and the model's predicted easy target preference is shown for a set of simulated response speeds. Response time speed and set size do not interact to predict accuracy (`r apa_print(accuracyPredictionStats)$full_result$RTSpeed_collapseNFLR`).
 
-```{r behavPredictionfig, fig.cap = "(ref:behavPredictionfig)"}
+```{r behavPredictionfig, fig.cap = "(ref:behavPredictionfig)", include = TRUE}
 include_graphics("Figures/BehavPredictionChoicePlots.tiff", auto_pdf = FALSE)
 ```
 
-(ref:behavPredictionfig) Plot showing the effect of response time and easy set size on easy target preference. While in general, larger easy target set sizes lead to a decrease in the preference to select that target, this also interacts with response time. The relationship between set size and easy target preference is steepest in the fastest quartile of trials, and relatively flat in the slowest quartile. 
+(ref:behavPredictionfig) Plot showing the effect of response time and easy set size on easy target preference. While in general, larger easy target set sizes lead to a decrease in the preference to select that target, this also interacts with response time. The relationship between set size and easy target preference is steepest in the fastest quartile of trials, and relatively flat in the slowest quartile.
+
+
 
 ## ERP results
 
-### N2pc
+### Set size effect
 
 ```{r N2pcStats, include= FALSE}
 N2pc.data <- allData %>%
@@ -732,19 +739,8 @@ ggplot(N2pc.data, aes(x = EasySet, y = diff)) +
   geom_point()
 N2pc.data$EasySet <- as.factor(N2pc.data$EasySet)
 contrasts(N2pc.data$EasySet) <- contr.poly(7)
-result <- lm(diff ~ 1 + EasySet, data = N2pc.data)
-round(summary(result)$coefficients,3)
+N2pc.res <- lm(diff ~ 1 + EasySet, data = N2pc.data)
 ```
-
-```{r N2pcTrend, fig.cap = "(ref:N2pcTrendPlot)"}
-#include_graphics("Figures/N2pcTrend.tiff", auto_pdf = FALSE)
-```
-
-(ref:N2pcTrendPlot) N2pc amplitude as a function of easy set size. Individual data is shown in blue and the group average is shown in black.
-
-Linear modelling showed a significant effect of set size on N2pc amplitude where the likelihood of responding to the N2pc to the easy target's visual field decreased as the number of easy-coloured rings increased (`r apa_print(result)$full_result$EasySet_L`). 
-
-### P1pc
 
 ```{r P1pcStats, include= FALSE}
 #plot values
@@ -774,19 +770,8 @@ ggplot(P1pc.data, aes(x = EasySet, y = diff)) +
   geom_point()
 P1pc.data$EasySet <- as.factor(P1pc.data$EasySet)
 contrasts(P1pc.data$EasySet) <- contr.poly(7)
-result <- lm(diff ~ 1 + EasySet, data = P1pc.data)
-round(summary(result)$coefficients,3)
+p1pc.res <- lm(diff ~ 1 + EasySet, data = P1pc.data)
 ```
-
-```{r P1pcTrend, fig.cap = "(ref:p1pcTrendPlot)"}
-#include_graphics("Figures/P1pcTrend.tiff", auto_pdf = FALSE)
-```
-
-(ref:p1pcTrendPlot) P1pc amplitude as a function of easy set size. Individual data is shown in blue and the group average is shown in black.
-
-Linear modelling showed a significant effect of set size on N2pc amplitude where the likelihood of responding to the P1pc to the easy target's visual field increased as the number of easy-coloured rings increased (`r apa_print(result)$full_result$EasySet_L`). 
-
-### SPCN
 
 ```{r SPCNStats, include= FALSE}
 SPCN.data <- allData %>%
@@ -822,17 +807,10 @@ ggplot(SPCN.data, aes(x = EasySet, y = diff)) +
   geom_point()
 SPCN.data$EasySet <- as.factor(SPCN.data$EasySet)
 contrasts(SPCN.data$EasySet) <- contr.poly(7)
-result <- lm(diff ~ 1 + EasySet, data = SPCN.data)
-round(summary(result)$coefficients,3)
+spcn.res <- lm(diff ~ 1 + EasySet, data = SPCN.data)
 ```
 
-```{r SPCNTrend, fig.cap = "(ref:SPCNTrendPlot)"}
-#include_graphics("Figures/SPCNTrend.tiff", auto_pdf = FALSE)
-```
-
-(ref:SPCNTrendPlot) SPCN amplitude as a function of easy set size. Individual data is shown in blue and the group average is shown in black.
-
-Linear modelling showed a significant effect of set size on N2pc amplitude where the likelihood of responding to the P1pc to the easy target's visual field increased as the number of easy-coloured rings increased (`r apa_print(result)$full_result$EasySet_L`). 
+Linear modelling showed a significant effect of set size on P1pc (`r apa_print(N2pc.res)$full_result$EasySet_L`) where P1pc amplitude increased as the easy set size increased. We also observed a significant effect of set size on N2pc (`r apa_print(N2pc.res)$full_result$EasySet_L`) although in this case N2pc amplitude decreased as easy set size increased. Finally, we also saw a significant effect of set size on SPCN amplitude (`r apa_print(N2pc.res)$full_result$EasySet_L`) where SPCN amplitude increased as easy set size increased.
 
 ```{r fullSetPlot, include= FALSE}
 #Subtracted ERPs split by all set sizes
@@ -865,13 +843,13 @@ ERPPlot / (p1pcPlot | n2pcPlot | SPCNPlot) &
 ggsave("Figures/ERPSPPT.tiff", dpi = 100, width = 27, height = 18, units = "cm")
 ```
 
-```{r includingERPfig, fig.cap="(ref:fullSetERPCap)"}
+```{r includingERPfig, fig.cap="(ref:fullSetERPCap)", include = TRUE}
 include_graphics("Figures/ERPSPPT.tiff", auto_pdf = FALSE)
 ```
 
-(ref:fullSetERPCap) Subtractracted ERPs showing the lateralized response contralateral to the side of the easy target as a function of easy set size. Component windows are highlighted.
+(ref:fullSetERPCap) Subtracted ERPs showing the lateralized response contralateral to the side of the easy target as a function of easy set size. Component windows are highlighted.
 
-## Predicting choice
+### Predicting choice behaviour
 
 ```{r ERPPredictChoice, include=FALSE}
 p1pc <- allData %>%
@@ -907,85 +885,88 @@ spcn <- allData %>%
   summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral)
-summary(lmer(propEasy ~ EasySet * diff + (1|Subject), data=p1pc))
-summary(lmer(propEasy ~ EasySet * diff + (1|Subject), data=n2pc))
-summary(lmer(propEasy ~ EasySet * diff + (1|Subject), data=spcn))
 
 p1pcmodel <- lmer(propEasy ~ EasySet * diff + (1|Subject), data=p1pc)
 n2pcmodel <- lmer(propEasy ~ EasySet * diff + (1|Subject), data=n2pc)
 spcnmodel <- lmer(propEasy ~ EasySet * diff + (1|Subject), data=spcn)
 #predictionStats <- lmer(propEasy ~ EasySet * diff + (1|Subject), data=n2pc)
 #Use model to predict preferences based on some simulated RTspeed and numEasy 
-simulate = data.frame(diff = c(-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1,-1.1, -0.4, 0.4, 1.1), EasySet = c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7), Subject = rep(2,28))
+simulate = data.frame(diff = c(1, 2, 3, 4,1, 2, 3, 4,1, 2, 3, 4,1, 2, 3, 4,1, 2, 3, 4,1, 2, 3, 4,1, 2, 3, 4), EasySet = c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7), Subject = rep(2,28))
 simulate$p1pcPrediction = predict(p1pcmodel,simulate)
 simulate$n2pcPrediction = predict(n2pcmodel,simulate)
 simulate$spcnPrediction = predict(spcnmodel,simulate)
-p1pcSimPlot <- ggplot(simulate, aes(x=EasySet, y=p1pcPrediction, group = diff, color = as.factor(diff))) + geom_line()
-n2pcSimPlot <- ggplot(simulate, aes(x=EasySet, y=n2pcPrediction, group = diff, color = as.factor(diff))) + geom_line()
-spcnSimPlot <- ggplot(simulate, aes(x=EasySet, y=spcnPrediction, group = diff, color = as.factor(diff))) + geom_line()
+p1pcSimPlot <- ggplot(simulate, aes(x=EasySet, y=p1pcPrediction, group = diff, color = diff)) + geom_line() + scale_colour_gradient2(low = "#4B0A0A", mid = "#E61919", high = "#FAD2D2") + theme_apa()
+n2pcSimPlot <- ggplot(simulate, aes(x=EasySet, y=n2pcPrediction, group = diff, color = diff)) + geom_line() + scale_colour_gradient2(low = "#0A4B0A", mid = "#19E619", high = "#D2FAD2") + theme_apa()
+spcnSimPlot <- ggplot(simulate, aes(x=EasySet, y=spcnPrediction, group = diff, color = diff)) + geom_line() + theme_apa()
 
 p1pcQuintPlot <- allData %>%
   filter(Event == "Search", rej == 0) %>%
   mutate(sample = sample*2-baseline) %>%
   group_by(Subject) %>%
-  mutate(RTSpeed = ntile(RT,5), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
   select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
   filter(sample > P1pcStart & sample < P1pcEnd) %>%
   group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
   summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>%
-  mutate(diffQrt = as.factor(ntile(diff,5))) %>%
+  mutate(diffQrt = as.factor(ntile(diff,4))) %>%
   group_by(EasySet, diffQrt) %>%
   summarise(propEasy = mean(propEasy), diff = as.factor(mean(diff))) %>%
-  ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = diffQrt)) +
-  geom_line()
+  ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = as.numeric(diffQrt))) +
+  geom_line() +
+  scale_colour_gradient2(low = "#4B0A0A", mid = "#E61919", high = "#FAD2D2") +
+  theme_apa()
 n2pcQuintPlot <- allData %>%
   filter(Event == "Search", rej == 0) %>%
   mutate(sample = sample*2-baseline) %>%
   group_by(Subject) %>%
-  mutate(RTSpeed = ntile(RT,5), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
   select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
   filter(sample > N2pcStart & sample < N2pcEnd) %>%
   group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
   summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>%
-  mutate(diffQrt = as.factor(ntile(diff,5))) %>%
+  mutate(diffQrt = as.factor(ntile(diff,4))) %>%
   group_by(EasySet, diffQrt) %>%
   summarise(propEasy = mean(propEasy), diff = as.factor(mean(diff))) %>%
-  ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = diffQrt)) +
-  geom_line()
+  ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = as.numeric(diffQrt))) +
+  geom_line() +
+  scale_colour_gradient2(low = "#0A4B0A", mid = "#19E619", high = "#D2FAD2") +
+  theme_apa()
 spcnQuintPlot <- allData %>%
   filter(Event == "Search", rej == 0) %>%
   mutate(sample = sample*2-baseline) %>%
   group_by(Subject) %>%
-  mutate(RTSpeed = ntile(RT,5), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
+  mutate(RTSpeed = ntile(RT,4), ExpHalf = ntile(BlockN,2), ExpHalf = ifelse(BlockN==1,"First Half","Second Half")) %>%
   select(-c("StimTrig","Event", "EasyField", "Distance", "Response", "RT", "TrialN", "BlockN", "choseStay", "rej", "SimpSet", "Hem", "ExpHalf")) %>%
   filter(sample > SPCNStart & sample < SPCNEnd) %>%
   group_by(EasySet,Hemisphere,RTSpeed, Subject) %>%
   summarise(propEasy = round(mean(choseEasy),2), mean = mean(voltage)) %>%
   spread(Hemisphere, mean) %>% 
   mutate(diff = Contralateral - Ipsilateral) %>%
-  mutate(diffQrt = as.factor(ntile(diff,5))) %>%
+  mutate(diffQrt = as.factor(ntile(diff,4))) %>%
   group_by(EasySet, diffQrt) %>%
   summarise(propEasy = mean(propEasy), diff = as.factor(mean(diff))) %>%
-  ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = diffQrt)) +
-  geom_line()
+  ggplot(., aes(x=EasySet, y=propEasy, group = diffQrt, color = as.numeric(diffQrt))) +
+  geom_line() +
+  theme_apa()
 
 layout <- "abc
 def"
 p1pcQuintPlot + n2pcQuintPlot + spcnQuintPlot + p1pcSimPlot + n2pcSimPlot + spcnSimPlot +
-  plot_layout(design = layout)
+  plot_layout(design = layout, guides = "collect")
 ggsave("Figures/ERPPredictionPlot.tiff", dpi=100, width=32, height = 8, units = "cm")
 ```
 
+Mixed-effects models were used to evaluate whether easy target preference was affected by an interaction between set size condition and ERP component amplitude. A separate model was run for each component (P1pc, N2pc, and SPCN), however each model included easy set size as a predictor and subject as a random effect. Results showed that P1pc did not interact with set size to predict easy target preference. While the main effect of set size was significant (`r apa_print(p1pcmodel)$full_result$EasySet`), changes in P1pc amplitude across these conditions did not appear to impact on easy target preference (`r apa_print(p1pcmodel)$full_result$EasySet_diff`). We do, however, see an interaction between N2pc amplitude and set size that significantly predicts easy target preference (`r apa_print(n2pcmodel)$full_result$EasySet_diff`). The results of this interaction (displayed in Figure\ \@ref(fig:ERPPredfig)) suggest that N2pc amplitude has a limited effect on target preference in conditions where there is a small number of easy coloured targets and therefore set size and difficulty do not conflict. As the easy coloured set size increases however, and set size must begin to trade-off against difficulty, a larger N2pc for easy targets begins to predict a higher preference for the easy target. A similar effect is observed for SPCN amplitude which also interacts with set size to significantly predict easy target preference (`r apa_print(p1pcmodel)$full_result$EasySet_diff`). Again, the impact of SPCN amplitude on target preference is small when easy target set size is small, but as the set size/difficulty trade off increases, a larger SPCN to easy coloured objects predicts an increased preference for those targets.
 
-```{r ERPPredfig, fig.cap = "(ref:ERPPredPlot)"}
+```{r ERPPredfig, fig.cap = "(ref:ERPPredPlot)", include=TRUE}
 include_graphics("Figures/ERPPredictionPlot.tiff", auto_pdf = FALSE)
 ```
 
-(ref:ERPPredPlot) plots showing choice preference, accuracy, and RT as a function of easy set size.
+(ref:ERPPredPlot) Plots showing how set size and ERP component amplitudes predict target preference. In the top panel, component amplitudes are grouped into quartiles where 1 is the quartile of smallest values, and 4 is the quartile with highest values (for N2pc and SPCN which are negative components, the smallest values are therefore the highest amplitude for that component). In the bottom panel, you see the predicted target preference based on the mixed models for each component. 
 
 ## Extra analyses
 
@@ -1350,7 +1331,7 @@ of note:
 dissociation of n2pc and spcn. in the 4:4 condition we see normal results - no p1pc, an n2pc followed by spcn. In the small easy set conditions, we see surprise - inverse p1pc followed by n2pc followed by inverse/absent spcn. In the large easy set conditions we also see surprise - p1pc followed by no (not much) N2pc followed by SPCN.
 
 limitations
-People can attend to just vertical and horizontal rather than colours.
+People can attend to just vertical and horizontal rather than colours. This would only lead to underestimatino of the effect?
 
 \newpage
 
